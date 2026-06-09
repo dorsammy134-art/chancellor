@@ -428,6 +428,162 @@
       margin-left: 0;
     }
   }
+
+  /* ── Counsellor dashboard extras ── */
+  .badge-warning { background: #fef3c7; color: #b45309; }
+  .badge-danger  { background: #fee2e2; color: #dc2626; }
+  .badge-muted   { background: #f1f5f9; color: #64748b; }
+
+  .risk-high   { border-left: 4px solid #dc2626; }
+  .risk-medium { border-left: 4px solid #f59e0b; }
+  .risk-low    { border-left: 4px solid #22c55e; }
+
+  .student-row { cursor: pointer; transition: background 0.15s; }
+  .student-row:hover { background: #f8fafc; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 32px;
+    width: 92%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+
+  .modal-box h3 { color: var(--primary); margin-bottom: 16px; font-size: 18px; }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    background: var(--light);
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .timeline-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .note-area {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 90px;
+    font-family: inherit;
+  }
+  .note-area:focus { border-color: var(--secondary); outline: none; }
+
+  .mood-bar-wrap { margin: 4px 0 14px; }
+  .mood-bar-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .mood-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #dc2626, #f59e0b, #22c55e);
+  }
+
+  .section-heading {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-bar input, .filter-bar select {
+    padding: 8px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 30px;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .filter-bar input:focus, .filter-bar select:focus {
+    border-color: var(--secondary);
+  }
+
+  .alert-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+  }
+
+  .alert-icon { font-size: 24px; }
+  .alert-body { flex: 1; }
+  .alert-name { font-weight: 600; font-size: 14px; }
+  .alert-msg  { font-size: 12px; color: var(--gray); margin-top: 2px; }
+
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+  }
+
+  .tab-btn {
+    padding: 9px 18px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .tab-btn.active {
+    color: var(--secondary);
+    border-bottom-color: var(--secondary);
+    background: rgba(13,148,136,0.04);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 </style>
 </head>
 <body>
@@ -556,19 +712,133 @@
 
     <!-- Counsellor Dashboard -->
     <div class="page" id="page-counsellor-dashboard">
+      <div class="section-heading">👨‍⚕️ Counsellor Dashboard</div>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalStudents">0</div><div class="stat-label">Students</div></div>
-        <div class="stat-card"><div class="stat-icon">🚨</div><div class="stat-value" id="crisisAlerts">0</div><div class="stat-label">Crisis Alerts</div></div>
-        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="unreadMessages">0</div><div class="stat-label">Unread</div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalStudents">0</div><div class="stat-label">Assigned Students</div></div>
+        <div class="stat-card risk-high" style="border-left:4px solid #dc2626"><div class="stat-icon">🚨</div><div class="stat-value" id="crisisAlerts" style="color:#dc2626">0</div><div class="stat-label">Crisis Alerts</div></div>
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="todaySessions">0</div><div class="stat-label">Sessions Today</div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="unreadMessages">0</div><div class="stat-label">Pending Notes</div></div>
       </div>
-      <div class="card">
-        <div class="card-title">Student List</div>
-        <div style="overflow-x: auto;">
+
+      <!-- Crisis Alerts -->
+      <div class="card" id="crisisAlertsCard" style="border:1.5px solid #fecaca; display:none;">
+        <div class="card-title" style="color:#dc2626">🚨 Active Crisis Alerts</div>
+        <div id="crisisAlertsList"></div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="cTab('students')">👥 Students</button>
+        <button class="tab-btn" onclick="cTab('sessions')">📅 Sessions</button>
+        <button class="tab-btn" onclick="cTab('notes')">📝 Notes</button>
+      </div>
+
+      <!-- Tab: Students -->
+      <div class="tab-panel active" id="ctab-students">
+        <div class="filter-bar">
+          <input type="text" id="studentSearch" placeholder="🔍 Search students…" oninput="filterStudents()">
+          <select id="riskFilter" onchange="filterStudents()">
+            <option value="">All Risk Levels</option>
+            <option value="high">🔴 High Risk</option>
+            <option value="medium">🟡 Medium Risk</option>
+            <option value="low">🟢 Low Risk</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
           <table class="data-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody id="studentsTableBody"><tr><td colspan="4">Loading...</td></tr></tbody>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Programme</th>
+                <th>Year</th>
+                <th>Risk Level</th>
+                <th>Last Active</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8">Loading students…</td></tr></tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Tab: Sessions -->
+      <div class="tab-panel" id="ctab-sessions">
+        <div class="card">
+          <div class="card-title">📅 Schedule a Session</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:13px;color:var(--gray);display:block;margin-bottom:4px;">Student</label>
+              <select id="sessionStudent" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;"></select>
+            </div>
+            <div>
+              <label style="font-size:13px;color:var(--gray);display:block;margin-bottom:4px;">Date &amp; Time</label>
+              <input type="datetime-local" id="sessionDate" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:13px;color:var(--gray);display:block;margin-bottom:4px;">Session Type</label>
+              <select id="sessionType" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;">
+                <option>Initial Assessment</option>
+                <option>Follow-up</option>
+                <option>Crisis Intervention</option>
+                <option>Group Session</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:13px;color:var(--gray);display:block;margin-bottom:4px;">Mode</label>
+              <select id="sessionMode" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;">
+                <option>In-Person</option>
+                <option>Online (Zoom)</option>
+                <option>Phone Call</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-secondary" style="margin-top:16px;" onclick="scheduleSession()">📅 Schedule Session</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Upcoming Sessions</div>
+          <div id="sessionsList">
+            <div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">No sessions scheduled yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Notes -->
+      <div class="tab-panel" id="ctab-notes">
+        <div class="card">
+          <div class="card-title">📝 Add Session Note</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:13px;color:var(--gray);display:block;margin-bottom:4px;">Student</label>
+              <select id="noteStudent" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;"></select>
+            </div>
+            <div>
+              <label style="font-size:13px;color:var(--gray);display:block;margin-bottom:4px;">Risk Flag</label>
+              <select id="noteRisk" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;">
+                <option value="low">🟢 Low</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="high">🔴 High / Crisis</option>
+              </select>
+            </div>
+          </div>
+          <textarea id="noteText" class="note-area" placeholder="Session notes, observations, follow-up actions…"></textarea>
+          <button class="btn btn-primary" style="margin-top:12px;" onclick="saveNote()">💾 Save Note</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Recent Notes</div>
+          <div id="notesList">
+            <div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">No notes yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Detail Modal -->
+    <div class="modal-overlay" id="studentModal">
+      <div class="modal-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 id="modalStudentName">Student Profile</h3>
+          <button onclick="closeModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;">✕</button>
+        </div>
+        <div id="modalContent"></div>
       </div>
     </div>
 
@@ -596,6 +866,9 @@
 let currentUser = null;
 let messages = [];
 let isTyping = false;
+let counsellorStudents = [];
+let counsellorSessions = [];
+let counsellorNotes = [];
 
 // ============================================
 // AUTHENTICATION
@@ -707,7 +980,10 @@ function updateUIForRole() {
     ];
   } else if (currentUser.role === 'counsellor') {
     navItems = [
-      { id: 'counsellor-dashboard', icon: '🏠', label: 'Dashboard' }
+      { id: 'counsellor-dashboard', icon: '🏠', label: 'Dashboard' },
+      { id: 'counsellor-students', icon: '👥', label: 'My Students' },
+      { id: 'counsellor-sessions', icon: '📅', label: 'Sessions' },
+      { id: 'counsellor-notes', icon: '📝', label: 'Notes' }
     ];
   } else {
     navItems = [
@@ -736,9 +1012,29 @@ function updateUIForRole() {
 
 function navigateTo(pageId) {
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-  const targetPage = document.getElementById(`page-${pageId}`);
-  if (targetPage) targetPage.classList.add('active');
-  
+
+  // Counsellor sub-pages map to tabs inside the counsellor dashboard page
+  const counsellorTabMap = {
+    'counsellor-students': 'students',
+    'counsellor-sessions': 'sessions',
+    'counsellor-notes': 'notes'
+  };
+
+  if (counsellorTabMap[pageId]) {
+    const dashPage = document.getElementById('page-counsellor-dashboard');
+    if (dashPage) dashPage.classList.add('active');
+    cTab(counsellorTabMap[pageId]);
+    pageId = 'counsellor-dashboard'; // for nav highlight
+  } else {
+    const targetPage = document.getElementById(`page-${pageId}`);
+    if (targetPage) targetPage.classList.add('active');
+  }
+
+  // Highlight active nav item
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  const activeNav = document.querySelector(`.nav-item[onclick*="${pageId}"]`);
+  if (activeNav) activeNav.classList.add('active');
+
   if (pageId === 'student-chat') loadChatHistory();
 }
 
@@ -835,14 +1131,281 @@ async function loadCounsellorData() {
     const response = await fetch('/.netlify/functions/get-students');
     const data = await response.json();
     if (data.students) {
-      document.getElementById('studentsTableBody').innerHTML = data.students.map(s => `
-        <tr><td>${escapeHtml(s.full_name || 'Unknown')}</td><td>${escapeHtml(s.email)}</td><td><span class="badge badge-success">Active</span></td><td><button class="btn btn-secondary btn-sm" onclick="alert('Chat with student')">Message</button></td></tr>
-      `).join('');
-      document.getElementById('totalStudents').textContent = data.students.length;
+      counsellorStudents = data.students.map(s => ({
+        ...s,
+        risk: assignRisk(s),
+        lastActive: s.created_at
+      }));
+      renderStudentsTable(counsellorStudents);
+      document.getElementById('totalStudents').textContent = counsellorStudents.length;
+      populateStudentSelects();
+      checkCrisisAlerts();
+      updateCounsellorStats();
     }
   } catch (err) {
     console.error(err);
   }
+}
+
+// Deterministic mock risk based on student id
+function assignRisk(student) {
+  const n = (student.id || 0) % 10;
+  if (n < 2) return 'high';
+  if (n < 5) return 'medium';
+  return 'low';
+}
+
+function riskBadge(risk) {
+  if (risk === 'high')   return '<span class="badge badge-danger">🔴 High</span>';
+  if (risk === 'medium') return '<span class="badge badge-warning">🟡 Medium</span>';
+  return '<span class="badge badge-success">🟢 Low</span>';
+}
+
+function renderStudentsTable(list) {
+  const tbody = document.getElementById('studentsTableBody');
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8">No students found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(s => `
+    <tr class="student-row" onclick="openStudentModal(${s.id})">
+      <td><strong>${escapeHtml(s.full_name || 'Unknown')}</strong></td>
+      <td style="font-size:12px;color:#64748b">${escapeHtml(s.programme || '—')}</td>
+      <td style="font-size:13px">${s.year_of_study ? 'Year ' + s.year_of_study : '—'}</td>
+      <td>${riskBadge(s.risk)}</td>
+      <td style="font-size:12px;color:#64748b">${formatDate(s.lastActive)}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openStudentModal(${s.id})">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function filterStudents() {
+  const q = document.getElementById('studentSearch').value.toLowerCase();
+  const risk = document.getElementById('riskFilter').value;
+  const filtered = counsellorStudents.filter(s => {
+    const matchQ = !q || (s.full_name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.programme || '').toLowerCase().includes(q);
+    const matchR = !risk || s.risk === risk;
+    return matchQ && matchR;
+  });
+  renderStudentsTable(filtered);
+}
+
+function checkCrisisAlerts() {
+  const crisisStudents = counsellorStudents.filter(s => s.risk === 'high');
+  document.getElementById('crisisAlerts').textContent = crisisStudents.length;
+  const card = document.getElementById('crisisAlertsCard');
+  if (crisisStudents.length > 0) {
+    card.style.display = '';
+    document.getElementById('crisisAlertsList').innerHTML = crisisStudents.map(s => `
+      <div class="alert-row">
+        <div class="alert-icon">🚨</div>
+        <div class="alert-body">
+          <div class="alert-name">${escapeHtml(s.full_name || 'Unknown')}</div>
+          <div class="alert-msg">${escapeHtml(s.email)} · ${s.programme || '—'}</div>
+        </div>
+        <button class="btn btn-sm" style="background:#dc2626;color:white;" onclick="openStudentModal(${s.id})">Review</button>
+      </div>
+    `).join('');
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function updateCounsellorStats() {
+  document.getElementById('todaySessions').textContent = counsellorSessions.filter(s => isToday(s.date)).length;
+  document.getElementById('unreadMessages').textContent = counsellorNotes.length;
+}
+
+function isToday(dateStr) {
+  const d = new Date(dateStr);
+  const today = new Date();
+  return d.toDateString() === today.toDateString();
+}
+
+function populateStudentSelects() {
+  const opts = counsellorStudents.map(s => `<option value="${s.id}">${escapeHtml(s.full_name || s.email)}</option>`).join('');
+  const el1 = document.getElementById('sessionStudent');
+  const el2 = document.getElementById('noteStudent');
+  if (el1) el1.innerHTML = '<option value="">— Select student —</option>' + opts;
+  if (el2) el2.innerHTML = '<option value="">— Select student —</option>' + opts;
+}
+
+function openStudentModal(studentId) {
+  const s = counsellorStudents.find(x => x.id === studentId);
+  if (!s) return;
+  document.getElementById('modalStudentName').textContent = '👤 ' + (s.full_name || 'Unknown');
+
+  // Build mock mood trend (7 days)
+  const moodPoints = Array.from({length: 7}, (_, i) => Math.max(1, Math.min(10, 5 + Math.round((Math.sin(i * 1.2 + studentId) * 2.5)))));
+  const moodAvg = (moodPoints.reduce((a, b) => a + b, 0) / moodPoints.length).toFixed(1);
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  const studentNotes = counsellorNotes.filter(n => n.studentId == studentId);
+
+  document.getElementById('modalContent').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div class="stat-card" style="padding:14px;">
+        <div style="font-size:11px;color:var(--gray);">Email</div>
+        <div style="font-size:13px;font-weight:600;">${escapeHtml(s.email)}</div>
+      </div>
+      <div class="stat-card" style="padding:14px;">
+        <div style="font-size:11px;color:var(--gray);">Programme</div>
+        <div style="font-size:13px;font-weight:600;">${escapeHtml(s.programme || '—')}</div>
+      </div>
+      <div class="stat-card" style="padding:14px;">
+        <div style="font-size:11px;color:var(--gray);">Year of Study</div>
+        <div style="font-size:13px;font-weight:600;">${s.year_of_study ? 'Year ' + s.year_of_study : '—'}</div>
+      </div>
+      <div class="stat-card" style="padding:14px;">
+        <div style="font-size:11px;color:var(--gray);">Risk Level</div>
+        <div>${riskBadge(s.risk)}</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div class="card-title">📈 Mood Trend (Last 7 Days) · Avg: ${moodAvg}/10</div>
+      ${moodPoints.map((m, i) => `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="width:30px;font-size:11px;color:#64748b;">${days[i]}</span>
+          <div class="mood-bar-track" style="flex:1;">
+            <div class="mood-bar-fill" style="width:${m * 10}%;"></div>
+          </div>
+          <span style="width:20px;font-size:12px;text-align:right;">${m}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div class="card-title">🗒️ Session Notes (${studentNotes.length})</div>
+      ${studentNotes.length === 0
+        ? '<p style="font-size:13px;color:#94a3b8;">No notes for this student yet.</p>'
+        : '<div class="timeline">' + studentNotes.map(n => `
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:${n.risk === 'high' ? '#dc2626' : n.risk === 'medium' ? '#f59e0b' : '#22c55e'};"></div>
+            <div>
+              <div style="font-weight:600;margin-bottom:2px;">${formatDate(n.date)} · ${riskBadge(n.risk)}</div>
+              <div>${escapeHtml(n.text)}</div>
+            </div>
+          </div>
+        `).join('') + '</div>'
+      }
+    </div>
+
+    <div>
+      <div class="card-title">⚡ Quick Actions</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="prefillNote(${s.id});closeModal();cTab('notes')">📝 Add Note</button>
+        <button class="btn btn-primary btn-sm" onclick="prefillSession(${s.id});closeModal();cTab('sessions')">📅 Schedule Session</button>
+        ${s.risk === 'high' ? '<button class="btn btn-sm" style="background:#dc2626;color:white;" onclick="alert(\'Befrienders Kenya: 0800 723 253 (free, 24/7)\')">🚨 Crisis Resources</button>' : ''}
+      </div>
+    </div>
+  `;
+  document.getElementById('studentModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('studentModal').classList.remove('open');
+}
+
+function prefillNote(studentId) {
+  const el = document.getElementById('noteStudent');
+  if (el) el.value = studentId;
+}
+
+function prefillSession(studentId) {
+  const el = document.getElementById('sessionStudent');
+  if (el) el.value = studentId;
+}
+
+function cTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('ctab-' + name);
+  if (panel) panel.classList.add('active');
+  const btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(b => { if (b.textContent.toLowerCase().includes(name.slice(0, 4))) b.classList.add('active'); });
+}
+
+function scheduleSession() {
+  const studentId = document.getElementById('sessionStudent').value;
+  const date = document.getElementById('sessionDate').value;
+  const type = document.getElementById('sessionType').value;
+  const mode = document.getElementById('sessionMode').value;
+  if (!studentId || !date) { alert('Please select a student and date.'); return; }
+  const student = counsellorStudents.find(s => s.id == studentId);
+  const session = { studentId, studentName: student ? student.full_name : 'Unknown', date, type, mode };
+  counsellorSessions.push(session);
+  renderSessionsList();
+  updateCounsellorStats();
+  document.getElementById('sessionStudent').value = '';
+  document.getElementById('sessionDate').value = '';
+  alert('Session scheduled for ' + new Date(date).toLocaleString());
+}
+
+function renderSessionsList() {
+  const el = document.getElementById('sessionsList');
+  if (counsellorSessions.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">No sessions scheduled yet.</div>';
+    return;
+  }
+  const sorted = [...counsellorSessions].sort((a, b) => new Date(a.date) - new Date(b.date));
+  el.innerHTML = sorted.map((s, i) => `
+    <div class="timeline-item" style="margin-bottom:8px;">
+      <div class="timeline-dot" style="background:var(--secondary);"></div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:13px;">${escapeHtml(s.studentName)} · ${s.type}</div>
+        <div style="font-size:12px;color:#64748b;">${new Date(s.date).toLocaleString()} · ${s.mode}</div>
+      </div>
+      <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;font-size:11px;" onclick="removeSession(${i})">Remove</button>
+    </div>
+  `).join('');
+}
+
+function removeSession(i) {
+  counsellorSessions.splice(i, 1);
+  renderSessionsList();
+  updateCounsellorStats();
+}
+
+function saveNote() {
+  const studentId = document.getElementById('noteStudent').value;
+  const text = document.getElementById('noteText').value.trim();
+  const risk = document.getElementById('noteRisk').value;
+  if (!studentId || !text) { alert('Please select a student and enter a note.'); return; }
+  const student = counsellorStudents.find(s => s.id == studentId);
+  const note = { studentId, studentName: student ? student.full_name : 'Unknown', text, risk, date: new Date().toISOString() };
+  counsellorNotes.unshift(note);
+  // update student risk in memory
+  if (student) student.risk = risk;
+  renderNotesList();
+  filterStudents();
+  checkCrisisAlerts();
+  updateCounsellorStats();
+  document.getElementById('noteText').value = '';
+  document.getElementById('noteStudent').value = '';
+}
+
+function renderNotesList() {
+  const el = document.getElementById('notesList');
+  if (counsellorNotes.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">No notes yet.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="timeline">' + counsellorNotes.map(n => `
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:${n.risk === 'high' ? '#dc2626' : n.risk === 'medium' ? '#f59e0b' : '#22c55e'};"></div>
+      <div>
+        <div style="font-weight:600;margin-bottom:2px;">${escapeHtml(n.studentName)} · ${formatDate(n.date)} · ${riskBadge(n.risk)}</div>
+        <div style="font-size:13px;">${escapeHtml(n.text)}</div>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 async function loadAdminData() {
