@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSpace Karu — AI Mental Health Support System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #0f2744;
+    --navy2: #1a3a5c;
+    --teal: #0d9488;
+    --teal2: #14b8a6;
+    --green: #22c55e;
+    --mint: #a7f3d0;
+    --sky: #e0f2fe;
+    --blue: #2563eb;
+    --white: #ffffff;
+    --off: #f8fafc;
+    --gray: #e2e8f0;
+    --mid: #94a3b8;
+    --dark: #1e293b;
+    --red: #dc2626;
+    --amber: #f59e0b;
+    --redlight: #fef2f2;
+    --amberlight: #fffbeb;
+    --greenlight: #f0fdf4;
+    --sidebar-w: 240px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--off); color: var(--dark); min-height: 100vh; overflow-x: hidden; }
+  
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+    background: linear-gradient(170deg, #0f2744 0%, #0a1e35 60%, #071528 100%);
+    display: flex; flex-direction: column; z-index: 100;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .sidebar-logo { padding: 28px 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .logo-mark { font-family: 'DM Serif Display', serif; font-size: 26px; color: #a7f3d0; letter-spacing: -0.5px; }
+  .logo-sub { font-size: 11px; color: rgba(167,243,208,0.5); margin-top: 2px; letter-spacing: 0.5px; }
+  .role-switcher { padding: 14px 16px 8px; }
+  .role-label { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px; }
+  .role-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+  .role-btn {
+    font-size: 10px; padding: 4px 10px; border-radius: 6px; border: none; cursor: pointer;
+    font-weight: 700; transition: all 0.2s; font-family: inherit;
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
+  }
+  .role-btn.active { background: #a7f3d0; color: #0f2744; }
+  .nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px; width: 100%;
+    padding: 11px 14px; border-radius: 10px; border: none; cursor: pointer;
+    background: transparent; color: rgba(255,255,255,0.55); font-size: 14px; font-weight: 500;
+    font-family: inherit; text-align: left; margin-bottom: 2px;
+    border-left: 3px solid transparent; transition: all 0.18s;
+  }
+  .nav-item:hover { background: rgba(167,243,208,0.08); color: rgba(255,255,255,0.8); }
+  .nav-item.active {
+    background: rgba(167,243,208,0.13); color: #a7f3d0; font-weight: 700;
+    border-left-color: #a7f3d0;
+  }
+  .nav-icon { font-size: 17px; flex-shrink: 0; }
+  .sidebar-user {
+    padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10;
+  }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #0d9488, #22c55e);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; color: #a7f3d0; font-weight: 700; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+
+  .main { margin-left: var(--sidebar-w); padding: 36px 40px; min-height: 100vh; }
+  .page { display: none; animation: fadeIn 0.25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .sh { margin-bottom: 28px; }
+  .sh h1 { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--navy); font-weight: 400; letter-spacing: -0.5px; }
+  .sh p { font-size: 14px; color: var(--mid); margin-top: 5px; }
+
+  .card { background: var(--white); border-radius: 16px; border: 1px solid var(--gray); box-shadow: 0 2px 12px rgba(15,39,68,0.07); overflow: hidden; }
+  .card-p { padding: 24px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  .mb20 { margin-bottom: 20px; }
+
+  .stat { padding: 22px; position: relative; overflow: hidden; }
+  .stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat.navy::before { background: var(--navy); }
+  .stat.teal::before { background: var(--teal); }
+  .stat.green::before { background: var(--green); }
+  .stat.red::before { background: var(--red); }
+  .stat.amber::before { background: var(--amber); }
+  .stat-icon { font-size: 22px; margin-bottom: 10px; }
+  .stat-val { font-size: 34px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--mid); font-weight: 600; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.3px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+    font-size: 14px; padding: 11px 22px; transition: all 0.18s;
+    font-family: inherit; text-decoration: none;
+  }
+  .btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 8px; }
+  .btn-primary { background: linear-gradient(135deg, var(--navy), var(--navy2)); color: white; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(15,39,68,0.25); }
+  .btn-green { background: linear-gradient(135deg, var(--teal), var(--green)); color: white; }
+  .btn-green:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,148,136,0.3); }
+  .btn-ghost { background: transparent; color: var(--navy); border: 2px solid var(--navy); }
+  .btn-ghost:hover { background: var(--navy); color: white; }
+  .btn-w { width: 100%; justify-content: center; }
+
+  .banner {
+    border-radius: 14px; padding: 18px 22px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .banner-icon { font-size: 26px; flex-shrink: 0; }
+  .banner-title { font-weight: 800; font-size: 15px; }
+  .banner-sub { font-size: 13px; margin-top: 3px; line-height: 1.5; }
+  .banner-green { background: var(--greenlight); border: 2px solid var(--green); }
+  .banner-green .banner-title { color: var(--teal); }
+  .banner-red { background: var(--redlight); border: 2px solid var(--red); }
+  .banner-amber { background: var(--amberlight); border: 2px solid var(--amber); }
+
+  .chat-wrap { height: 360px; overflow-y: auto; padding: 20px; background: var(--off); display: flex; flex-direction: column; gap: 14px; }
+  .msg { display: flex; flex-direction: column; max-width: 65%; }
+  .msg.me { align-self: flex-end; align-items: flex-end; }
+  .msg.them { align-self: flex-start; align-items: flex-start; }
+  .msg-bubble {
+    padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.55;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .msg.me .msg-bubble { background: linear-gradient(135deg, #0f2744, #1d4ed8); color: white; border-bottom-right-radius: 4px; }
+  .msg.them .msg-bubble { background: white; color: var(--dark); border-bottom-left-radius: 4px; }
+  .msg-time { font-size: 11px; color: var(--mid); margin-top: 4px; }
+  .chat-input-area { padding: 16px 20px; background: white; border-top: 1px solid var(--gray); display: flex; gap: 10px; align-items: flex-end; }
+  .chat-input-area input { flex: 1; }
+
+  .typing-bubble { display:flex; align-items:center; gap:5px; padding:12px 16px; background:white; border-radius:16px; border-bottom-left-radius:4px; width:fit-content; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+  .typing-dot { width:8px; height:8px; border-radius:50%; background:var(--mid); animation: typing 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+  .ai-badge { font-size:10px; font-weight:800; letter-spacing:0.5px; padding:2px 7px; border-radius:4px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
+  .live-clock {
+    font-size: 11px; color: rgba(167,243,208,0.7); font-weight: 700;
+    letter-spacing: 0.5px; padding: 4px 10px; background: rgba(167,243,208,0.08);
+    border-radius: 6px; border: 1px solid rgba(167,243,208,0.15);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse-dot 1.5s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+
+  .login-screen {
+    position: fixed; inset: 0; z-index: 9000;
+    background: linear-gradient(135deg, #0a1e35 0%, #0f2744 40%, #0d3b5e 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; overflow-y: auto; padding: 24px;
+  }
+  .login-screen.hidden { display: none; }
+  .login-box {
+    background: white; border-radius: 24px; padding: 40px 44px;
+    width: 100%; max-width: 460px; box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    position: relative; overflow: hidden;
+  }
+  .login-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #0d9488, #22c55e, #2563eb);
+  }
+  .login-logo { text-align: center; margin-bottom: 26px; }
+  .login-logo .logo-main { font-family: 'DM Serif Display', serif; font-size: 30px; color: #0f2744; }
+  .login-field { margin-bottom: 14px; }
+  .login-field label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
+  .login-field input { width: 100%; padding: 12px 15px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; }
+  .login-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 800;
+    background: linear-gradient(135deg, #0f2744, #1d4ed8); color: white;
+    transition: all 0.2s; margin-top: 6px;
+  }
+  .login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(15,39,68,0.3); }
+  .login-error { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 11px 15px; font-size: 13px; color: #dc2626; margin-bottom: 14px; display: none; }
+  .switch-link { text-align: center; margin-top: 16px; font-size: 13px; }
+  .switch-link a { color: #0d9488; font-weight: 700; cursor: pointer; }
+
+  .notif {
+    position: fixed; top: 20px; right: 20px; background: var(--navy);
+    color: white; padding: 14px 22px; border-radius: 12px; font-size: 14px;
+    font-weight: 600; z-index: 9999; transform: translateX(120%);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .notif.show { transform: translateX(0); }
+  .notif.success { border-left: 4px solid var(--green); }
+</style>
+</head>
+<body>
+
+<div id="notif" class="notif"></div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box" id="loginPanel">
+    <div class="login-logo">
+      <div class="logo-main">🧠 MindSpace Karu</div>
+      <div class="logo-sub">AI-Powered Mental Health Support</div>
+    </div>
+    <div id="loginError" class="login-error"></div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="doreen.sammy@karu.ac.ke">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="student123">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="switch-link">
+      <a onclick="showDemoHint()">Demo: doreen.sammy@karu.ac.ke / student123</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">MindSpace Karu</div>
+    <div class="logo-sub">AI Counsellor</div>
+  </div>
+  <div style="padding:8px 20px 4px">
+    <div class="live-clock"><span class="live-dot"></span><span id="liveClock">--:--:--</span></div>
+  </div>
+  <div class="role-switcher">
+    <div class="role-label">DEMO — SWITCH ROLE</div>
+    <div class="role-btns">
+      <button class="role-btn active" onclick="switchRole('student')">Student</button>
+      <button class="role-btn" onclick="switchRole('counsellor')">Counsellor</button>
+      <button class="role-btn" onclick="switchRole('admin')">Admin</button>
+    </div>
+  </div>
+  <nav class="nav" id="nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="userAvatar">👩</div>
+    <div style="margin-left:10px">
+      <div class="user-name" id="userName">Doreen Sammy</div>
+      <div class="user-role" id="userRoleLabel">Student · Year 3 CS</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="page active" id="page-dashboard">
+    <div class="sh"><h1>Welcome back, Doreen 👋</h1><p>Your mental wellness overview — <span id="todayDate"></span></p></div>
+    <div class="g4 mb20">
+      <div class="card stat navy"><div class="stat-icon">📊</div><div class="stat-val">8</div><div class="stat-label">Last PHQ-9 Score</div></div>
+      <div class="card stat teal"><div class="stat-icon">💭</div><div class="stat-val">5</div><div class="stat-label">Last GAD-7 Score</div></div>
+      <div class="card stat green"><div class="stat-icon">😊</div><div class="stat-val">4.4</div><div class="stat-label">Avg Mood This Week</div></div>
+      <div class="card stat amber"><div class="stat-icon">✅</div><div class="stat-val">3</div><div class="stat-label">Assessments Taken</div></div>
+    </div>
+    <div class="g2 mb20">
+      <div class="card card-p">
+        <div style="font-weight:800;margin-bottom:16px">📈 Quick Actions</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-green btn-w" onclick="goTo('chat')">💬 Chat with AI Counsellor</button>
+          <button class="btn btn-primary btn-w" onclick="goTo('assessment')">📋 Take Assessment</button>
+          <button class="btn btn-ghost btn-w" onclick="goTo('resources')">📚 Resource Library</button>
+        </div>
+      </div>
+      <div class="card card-p">
+        <div style="font-weight:800;margin-bottom:16px">🤖 AI Counsellor - Dr. Kamau</div>
+        <div style="font-size:14px;color:var(--mid);margin-bottom:16px">Available 24/7 for confidential support. Powered by advanced AI for natural conversations.</div>
+        <button class="btn btn-green btn-w" onclick="goTo('chat')">Start Conversation →</button>
+      </div>
+    </div>
+    <div class="banner banner-green">
+      <div class="banner-icon">💚</div>
+      <div><div class="banner-title">24/7 AI Support Available</div><div class="banner-sub">Crisis? Call Befrienders Kenya: 0800 723 253</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT PAGE -->
+  <div class="page" id="page-chat">
+    <div class="sh"><h1>Chat with AI Counsellor</h1><p>Confidential, encrypted conversations with Dr. Kamau (AI-Powered)</p></div>
+    <div class="card" style="max-width:740px">
+      <div style="background:linear-gradient(135deg,#0f2744,#1d4ed8);padding:18px 24px;display:flex;align-items:center;gap:14px">
+        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#a7f3d0,#6ee7b7);display:flex;align-items:center;justify-content:center;font-size:20px">👨‍⚕️</div>
+        <div>
+          <div style="font-weight:800;color:white;font-size:15px">Dr. Kamau Njoroge (AI)</div>
+          <div style="font-size:12px;color:rgba(167,243,208,0.8)">🟢 Online · AI Counsellor</div>
+        </div>
+        <div style="margin-left:auto"><span class="ai-badge">🤖 AI-Powered</span></div>
+      </div>
+      <div class="chat-wrap" id="chatMessages">
+        <div class="msg them"><div class="msg-bubble">Hello! I'm Dr. Kamau, your AI counsellor. How are you feeling today? I'm here to listen and support you.</div><div class="msg-time">Just now</div></div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type your message... (Enter to send)" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-green" onclick="sendChat()">Send 🔒</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other pages (simplified for brevity) -->
+  <div class="page" id="page-assessment"><div class="sh"><h1>Assessment</h1><p>PHQ-9 and GAD-7 screening tools coming soon.</p></div></div>
+  <div class="page" id="page-resources"><div class="sh"><h1>Resources</h1><p>Mental health resources and coping strategies.</p></div></div>
+  <div class="page" id="page-c-dashboard"><div class="sh"><h1>Counsellor Dashboard</h1><p>Student overview and analytics.</p></div></div>
+  <div class="page" id="page-a-dashboard"><div class="sh"><h1>Admin Dashboard</h1><p>System administration.</p></div></div>
+</div>
+
+<script>
+// ============================================
+// SIMPLE LOGIN SYSTEM
+// ============================================
+const DEMO_USERS = {
+  'doreen.sammy@karu.ac.ke': { pass: 'student123', name: 'Doreen Sammy', role: 'student', roleLabel: 'Student · Year 3 CS', avatar: '👩' }
+};
+
+let state = { role: 'student', messages: [], aiTyping: false };
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPassword').value;
+  const user = DEMO_USERS[email];
+  
+  if (!user || user.pass !== pass) {
+    document.getElementById('loginError').textContent = 'Invalid email or password';
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+  
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('userName').textContent = user.name;
+  document.getElementById('userRoleLabel').textContent = user.roleLabel;
+  document.getElementById('userAvatar').textContent = user.avatar;
+  state.role = user.role;
+  buildNav();
+  goTo('chat');
+}
+
+function showDemoHint() {
+  document.getElementById('loginEmail').value = 'doreen.sammy@karu.ac.ke';
+  document.getElementById('loginPassword').value = 'student123';
+}
+
+function buildNav() {
+  const nav = document.getElementById('nav');
+  const items = [
+    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
+    { id: 'chat', icon: '💬', label: 'AI Counsellor' },
+    { id: 'assessment', icon: '📋', label: 'Assessment' },
+    { id: 'resources', icon: '📚', label: 'Resources' }
+  ];
+  nav.innerHTML = items.map(item => `<button class="nav-item" onclick="goTo('${item.id}')"><span class="nav-icon">${item.icon}</span>${item.label}</button>`).join('');
+}
+
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+}
+
+function switchRole(r) { state.role = r; goTo('dashboard'); }
+
+function notify(msg) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ============================================
+// AI CHAT FUNCTION - CALLS NETLIFY FUNCTION
+// ============================================
+function renderChat() {
+  const wrap = document.getElementById('chatMessages');
+  wrap.innerHTML = state.messages.map(m => `
+    <div class="msg ${m.from === 'user' ? 'me' : 'them'}">
+      <div class="msg-bubble">${m.text.replace(/</g, '&lt;')}</div>
+      <div class="msg-time">${m.time}</div>
+    </div>
+  `).join('');
+  
+  if(state.aiTyping) {
+    wrap.innerHTML += `<div class="msg them"><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div><div class="msg-time">Dr. Kamau is typing...</div></div>`;
+  }
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chatInput');
+  const text = inp.value.trim();
+  if(!text || state.aiTyping) return;
+  
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  state.messages.push({ from: 'user', text, time });
+  inp.value = '';
+  renderChat();
+  
+  state.aiTyping = true;
+  renderChat();
+  
+  try {
+    // Call your Netlify function
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        history: state.messages.filter(m => m.from === 'user' || m.from === 'assistant').slice(-10)
+      })
+    });
+    
+    const data = await response.json();
+    const aiResponse = data.response || "I'm here for you. Could you tell me more?";
+    
+    state.aiTyping = false;
+    state.messages.push({ from: 'assistant', text: aiResponse, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    renderChat();
+  } catch(error) {
+    console.error('Chat error:', error);
+    state.aiTyping = false;
+    // Fallback responses if AI fails
+    const fallbacks = [
+      "I'm here with you. Could you tell me more about how you're feeling?",
+      "Thank you for sharing. What else is on your mind today?",
+      "I hear you. Would you like to explore some coping strategies together?"
+    ];
+    state.messages.push({ from: 'assistant', text: fallbacks[Math.floor(Math.random() * fallbacks.length)], time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    renderChat();
+  }
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString();
+}
+updateClock();
+setInterval(updateClock, 1000);
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString();
+</script>
+</body>
+</html>
