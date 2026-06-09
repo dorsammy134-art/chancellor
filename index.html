@@ -3,103 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MindSpace Karu — AI Counsellor with Groq + Neon</title>
+<title>MindSpace Karu — Professional Mental Health System</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #0f2744;
+    --primary-light: #1a3a5c;
+    --secondary: #0d9488;
+    --secondary-light: #14b8a6;
+    --accent: #22c55e;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --dark: #1e293b;
+    --gray: #64748b;
+    --light: #f1f5f9;
+    --white: #ffffff;
+    --sidebar-width: 280px;
+  }
+
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0f2744 0%, #1a3a5c 100%);
+    background: var(--light);
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+
+  .app-container {
+    display: flex;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
   }
-  .chat-container {
-    max-width: 800px;
-    width: 100%;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    overflow: hidden;
-  }
-  .chat-header {
-    background: linear-gradient(135deg, #0f2744, #1d4ed8);
-    padding: 20px 24px;
+
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
     color: white;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
   }
-  .avatar {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #a7f3d0, #22c55e);
+
+  .sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--secondary-light), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+  }
+
+  .user-profile {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .user-avatar {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 32px;
+    margin: 0 auto 12px;
+    border: 3px solid rgba(255,255,255,0.3);
   }
-  .header-info { flex: 1; }
-  .header-info h1 { font-size: 18px; margin-bottom: 4px; }
-  .header-info p { font-size: 12px; opacity: 0.8; }
-  .badge-group { display: flex; gap: 8px; }
-  .badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 10px;
+
+  .user-name {
     font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
   }
-  .badge-groq { background: #f59e0b; color: white; }
-  .badge-neon { background: #22c55e; color: white; }
+
+  .user-role {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+  }
+
+  .nav-menu {
+    padding: 20px 0;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+
+  .nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: white;
+  }
+
+  .nav-item.active {
+    background: rgba(13,148,136,0.2);
+    color: var(--secondary-light);
+    border-left-color: var(--secondary);
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    width: 24px;
+  }
+
+  .nav-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    padding: 24px 32px;
+  }
+
+  .page {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .page.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+  }
+
+  .stat-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--primary);
+  }
+
   .chat-messages {
     height: 400px;
     overflow-y: auto;
-    padding: 20px;
-    background: #f8fafc;
+    padding: 16px;
+    background: var(--light);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
+
   .message {
     display: flex;
     flex-direction: column;
-    max-width: 75%;
+    max-width: 70%;
   }
-  .message.user { align-self: flex-end; }
-  .message.bot { align-self: flex-start; }
+
+  .message.user {
+    align-self: flex-end;
+  }
+
+  .message.bot {
+    align-self: flex-start;
+  }
+
   .message-content {
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-radius: 18px;
     font-size: 14px;
     line-height: 1.5;
   }
+
   .user .message-content {
-    background: linear-gradient(135deg, #0f2744, #1d4ed8);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
-    border-bottom-right-radius: 4px;
   }
+
   .bot .message-content {
     background: white;
-    color: #1e293b;
-    border-bottom-left-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    color: var(--dark);
+    border: 1px solid #e2e8f0;
   }
-  .time {
+
+  .message-time {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--gray);
     margin-top: 4px;
     margin-inline: 8px;
   }
+
   .chat-input-area {
-    padding: 16px 20px;
-    background: white;
-    border-top: 1px solid #e2e8f0;
+    margin-top: 16px;
     display: flex;
     gap: 12px;
   }
+
   .chat-input-area input {
     flex: 1;
     padding: 12px 16px;
@@ -107,52 +265,113 @@
     border-radius: 30px;
     font-size: 14px;
     outline: none;
-    font-family: inherit;
   }
-  .chat-input-area input:focus { border-color: #0d9488; }
+
+  .chat-input-area input:focus {
+    border-color: var(--secondary);
+  }
+
   .chat-input-area button {
-    background: linear-gradient(135deg, #0d9488, #22c55e);
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
     color: white;
     border: none;
-    padding: 0 28px;
     border-radius: 30px;
     font-weight: 600;
     cursor: pointer;
-    font-family: inherit;
   }
-  .chat-input-area button:hover { transform: scale(1.02); }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+    color: white;
+  }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .data-table th {
+    background: var(--light);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--gray);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-success { background: #dcfce7; color: #16a34a; }
+  .badge-info { background: #e0f2fe; color: #0284c7; }
+
   .typing {
     display: flex;
     gap: 4px;
-    padding: 10px 16px;
+    padding: 10px 14px;
     background: white;
     border-radius: 18px;
     width: fit-content;
   }
+
   .typing span {
     width: 8px;
     height: 8px;
-    background: #94a3b8;
+    background: var(--gray);
     border-radius: 50%;
     animation: typing 1.4s infinite;
   }
-  .typing span:nth-child(2) { animation-delay: 0.2s; }
-  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
   @keyframes typing {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
     30% { transform: translateY(-8px); opacity: 1; }
   }
-  .login-screen, .register-screen {
+
+  .login-screen {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #0a1e35, #0f2744);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 2000;
   }
-  .hidden { display: none; }
-  .login-box, .register-box {
+
+  .login-screen.hidden {
+    display: none;
+  }
+
+  .login-box {
     background: white;
     padding: 40px;
     border-radius: 24px;
@@ -160,59 +379,54 @@
     max-width: 420px;
     text-align: center;
   }
-  .login-box h2, .register-box h2 { color: #0f2744; margin-bottom: 8px; }
-  .login-box p, .register-box p { color: #64748b; margin-bottom: 24px; font-size: 14px; }
-  .login-box input, .register-box input, .register-box select {
+
+  .login-box h2 {
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .login-box input, .login-box select {
     width: 100%;
-    padding: 12px 14px;
+    padding: 12px;
     margin: 10px 0;
     border: 2px solid #e2e8f0;
     border-radius: 12px;
-    font-size: 14px;
-    font-family: inherit;
   }
-  .login-box input:focus, .register-box input:focus, .register-box select:focus {
-    outline: none;
-    border-color: #0d9488;
-  }
-  .login-box button, .register-box button {
+
+  .login-box button {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, #0d9488, #22c55e);
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
     color: white;
     border: none;
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
     margin-top: 16px;
-    font-size: 14px;
   }
-  .switch-link {
-    font-size: 13px;
-    color: #0d9488;
-    margin-top: 20px;
-    cursor: pointer;
-    text-decoration: underline;
-  }
+
   .error-msg {
-    color: #dc2626;
+    color: var(--danger);
     font-size: 12px;
     margin-top: 8px;
     display: none;
-    background: #fef2f2;
-    padding: 8px;
-    border-radius: 8px;
   }
-  .user-info {
-    font-size: 11px;
-    background: rgba(255,255,255,0.15);
-    padding: 4px 10px;
-    border-radius: 20px;
-    display: inline-block;
+
+  .switch-link {
+    margin-top: 16px;
+    color: var(--secondary);
+    cursor: pointer;
+    font-size: 13px;
   }
-  @media (max-width: 600px) {
-    .message { max-width: 85%; }
-    .login-box, .register-box { padding: 24px; margin: 16px; }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+      position: fixed;
+    }
+    .main-content {
+      margin-left: 0;
+    }
   }
 </style>
 </head>
@@ -222,62 +436,170 @@
 <div id="loginScreen" class="login-screen">
   <div class="login-box">
     <h2>🧠 MindSpace Karu</h2>
-    <p>AI-Powered Mental Health Support<br>with Groq AI + Neon Database</p>
+    <p style="color:#64748b; margin-bottom: 20px;">Professional Mental Health System</p>
     <div id="loginError" class="error-msg"></div>
-    <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
-    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    <input type="email" id="loginEmail" placeholder="Email address">
+    <input type="password" id="loginPassword" placeholder="Password">
     <button onclick="doLogin()">Sign In →</button>
-    <div class="switch-link" onclick="showRegister()">📝 New student? Create an account</div>
-    <div style="margin-top: 16px; font-size: 11px; color: #94a3b8;">Demo: student@karu.ac.ke / password123</div>
+    <div style="margin-top: 16px; font-size: 12px; color: #64748b;">
+      Demo: student@karu.ac.ke / password123
+    </div>
+    <div class="switch-link" onclick="showRegister()">📝 Create an account</div>
   </div>
 </div>
 
 <!-- Register Screen -->
-<div id="registerScreen" class="register-screen hidden">
-  <div class="register-box">
+<div id="registerScreen" class="login-screen hidden">
+  <div class="login-box">
     <h2>📝 Create Account</h2>
-    <p>Join MindSpace Karu for free</p>
+    <p style="color:#64748b; margin-bottom: 20px;">Join MindSpace Karu</p>
     <div id="registerError" class="error-msg"></div>
-    <input type="text" id="regName" placeholder="Full Name" autocomplete="name">
-    <input type="email" id="regEmail" placeholder="Email (@karu.ac.ke or @students.karu.ac.ke)" autocomplete="email">
-    <input type="text" id="regYear" placeholder="Year of Study (e.g., Year 3)">
-    <input type="text" id="regProgramme" placeholder="Programme (e.g., Computer Science)">
-    <input type="password" id="regPassword" placeholder="Password (min 8 characters)" autocomplete="new-password">
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="email" id="regEmail" placeholder="Email (@karu.ac.ke)">
+    <select id="regRole">
+      <option value="student">Student</option>
+      <option value="counsellor">Counsellor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <input type="password" id="regPassword" placeholder="Password (min 8 chars)">
     <button onclick="doRegister()">Create Account →</button>
     <div class="switch-link" onclick="showLogin()">← Back to Sign In</div>
   </div>
 </div>
 
-<!-- Chat App -->
-<div class="chat-container" id="chatApp" style="display: none;">
-  <div class="chat-header">
-    <div class="avatar">👨‍⚕️</div>
-    <div class="header-info">
-      <h1>Dr. Kamau Njoroge <span class="user-info" id="userNameDisplay"></span></h1>
-      <p>AI Counsellor · Available 24/7</p>
+<!-- Main App -->
+<div class="app-container" id="appContainer" style="display: none;">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">🧠 MindSpace Karu</div>
+      <div class="logo-sub">Professional Mental Health System</div>
     </div>
-    <div class="badge-group">
-      <span class="badge badge-groq">🤖 Groq AI</span>
-      <span class="badge badge-neon">🗄️ Neon DB</span>
+    <div class="user-profile">
+      <div class="user-avatar" id="userAvatar">👩</div>
+      <div class="user-name" id="userName">Student Name</div>
+      <div class="user-role" id="userRoleBadge">Student</div>
     </div>
-  </div>
-  <div class="chat-messages" id="chatMessages">
-    <div class="message bot">
-      <div class="message-content">Hello! I'm Dr. Kamau, your AI counsellor. I'm powered by Groq's LLaMA 3.3 70B model, and our conversation is securely stored in Neon PostgreSQL. How are you feeling today?</div>
-      <div class="time">Just now</div>
+    <nav class="nav-menu" id="navMenu"></nav>
+  </aside>
+
+  <main class="main-content">
+    <!-- Student Dashboard -->
+    <div class="page" id="page-student-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="lastPhqScore">-</div><div class="stat-label">Last PHQ-9 Score</div></div>
+        <div class="stat-card"><div class="stat-icon">💭</div><div class="stat-value" id="lastGadScore">-</div><div class="stat-label">Last GAD-7 Score</div></div>
+        <div class="stat-card"><div class="stat-icon">😊</div><div class="stat-value" id="avgMood">-</div><div class="stat-label">Average Mood</div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="chatCount">-</div><div class="stat-label">Messages</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Quick Actions</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="navigateTo('student-chat')">💬 Chat with AI Counsellor</button>
+          <button class="btn btn-primary" onclick="startAssessment('phq9')">📋 Take Assessment</button>
+          <button class="btn btn-primary" onclick="navigateTo('student-resources')">📚 Resource Library</button>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="chat-input-area">
-    <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
-    <button onclick="sendMessage()">Send →</button>
-  </div>
+
+    <!-- Student Chat -->
+    <div class="page" id="page-student-chat">
+      <div class="card">
+        <div class="card-title">💬 Chat with Dr. Kamau (AI Counsellor)</div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message bot">
+            <div class="message-content">Hello! I'm Dr. Kamau, your AI counsellor. How are you feeling today?</div>
+            <div class="message-time">Just now</div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+          <button onclick="sendMessage()">Send →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Assessment -->
+    <div class="page" id="page-student-assessment">
+      <div class="card">
+        <div class="card-title">📋 Mental Health Assessment</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="card" style="text-align: center; cursor: pointer;" onclick="startAssessment('phq9')">
+            <div style="font-size: 48px;">🧠</div>
+            <h3>PHQ-9</h3>
+            <p style="font-size: 12px; color: var(--gray);">Depression Screening</p>
+          </div>
+          <div class="card" style="text-align: center; cursor: pointer;" onclick="startAssessment('gad7')">
+            <div style="font-size: 48px;">💭</div>
+            <h3>GAD-7</h3>
+            <p style="font-size: 12px; color: var(--gray);">Anxiety Screening</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Resources -->
+    <div class="page" id="page-student-resources">
+      <div class="card">
+        <div class="card-title">📚 Resource Library</div>
+        <div style="display: grid; gap: 16px;">
+          <div class="card" style="cursor: pointer;" onclick="openResource('Understanding Depression')">
+            <h4>🧠 Understanding Depression</h4>
+            <p style="font-size: 13px; color: var(--gray);">Learn about symptoms and treatments</p>
+          </div>
+          <div class="card" style="cursor: pointer;" onclick="openResource('Managing Anxiety')">
+            <h4>💭 Managing Anxiety</h4>
+            <p style="font-size: 13px; color: var(--gray);">Practical techniques for anxiety relief</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Counsellor Dashboard -->
+    <div class="page" id="page-counsellor-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalStudents">0</div><div class="stat-label">Students</div></div>
+        <div class="stat-card"><div class="stat-icon">🚨</div><div class="stat-value" id="crisisAlerts">0</div><div class="stat-label">Crisis Alerts</div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="unreadMessages">0</div><div class="stat-label">Unread</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Student List</div>
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="studentsTableBody"><tr><td colspan="4">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="page" id="page-admin-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalUsers">0</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="totalMessages">0</div><div class="stat-label">Messages</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">User Management</div>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+          <tbody id="adminUsersTable"><tr><td colspan="3">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script>
+// ============================================
+// STATE
+// ============================================
 let currentUser = null;
 let messages = [];
 let isTyping = false;
 
+// ============================================
+// AUTHENTICATION
+// ============================================
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -302,10 +624,9 @@ async function doLogin() {
     
     if (data.success) {
       currentUser = data.user;
-      document.getElementById('userNameDisplay').textContent = currentUser.name;
       document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('chatApp').style.display = 'block';
-      await loadChatHistory();
+      document.getElementById('appContainer').style.display = 'flex';
+      updateUIForRole();
     } else {
       errorEl.textContent = data.error || 'Login failed';
       errorEl.style.display = 'block';
@@ -319,8 +640,7 @@ async function doLogin() {
 async function doRegister() {
   const name = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
-  const year = document.getElementById('regYear').value.trim();
-  const programme = document.getElementById('regProgramme').value.trim();
+  const role = document.getElementById('regRole').value;
   const password = document.getElementById('regPassword').value;
   const errorEl = document.getElementById('registerError');
   
@@ -332,8 +652,8 @@ async function doRegister() {
     return;
   }
   
-  if (!email.endsWith('@karu.ac.ke') && !email.endsWith('@students.karu.ac.ke')) {
-    errorEl.textContent = 'Please use a valid Karatina University email (@karu.ac.ke or @students.karu.ac.ke)';
+  if (!email.endsWith('@karu.ac.ke')) {
+    errorEl.textContent = 'Please use a valid @karu.ac.ke email';
     errorEl.style.display = 'block';
     return;
   }
@@ -348,19 +668,13 @@ async function doRegister() {
     const response = await fetch('/.netlify/functions/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        fullName: name, 
-        email, 
-        yearOfStudy: year || null, 
-        programme: programme || null, 
-        password 
-      })
+      body: JSON.stringify({ fullName: name, email, role, password })
     });
     
     const data = await response.json();
     
     if (data.success) {
-      alert('Account created successfully! Please sign in.');
+      alert('Account created! Please sign in.');
       showLogin();
       document.getElementById('loginEmail').value = email;
     } else {
@@ -373,48 +687,102 @@ async function doRegister() {
   }
 }
 
+// ============================================
+// UI MANAGEMENT
+// ============================================
+function updateUIForRole() {
+  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('userAvatar').textContent = currentUser.role === 'student' ? '👩' : (currentUser.role === 'counsellor' ? '👨‍⚕️' : '🧑‍💻');
+  document.getElementById('userRoleBadge').textContent = currentUser.role === 'student' ? 'Student' : (currentUser.role === 'counsellor' ? 'Counsellor' : 'Admin');
+  
+  const navMenu = document.getElementById('navMenu');
+  let navItems = [];
+  
+  if (currentUser.role === 'student') {
+    navItems = [
+      { id: 'student-dashboard', icon: '🏠', label: 'Dashboard' },
+      { id: 'student-chat', icon: '💬', label: 'Chat Counsellor' },
+      { id: 'student-assessment', icon: '📋', label: 'Self-Assessment' },
+      { id: 'student-resources', icon: '📚', label: 'Resources' }
+    ];
+  } else if (currentUser.role === 'counsellor') {
+    navItems = [
+      { id: 'counsellor-dashboard', icon: '🏠', label: 'Dashboard' }
+    ];
+  } else {
+    navItems = [
+      { id: 'admin-dashboard', icon: '🏠', label: 'Dashboard' }
+    ];
+  }
+  
+  navMenu.innerHTML = navItems.map(item => `
+    <div class="nav-item" onclick="navigateTo('${item.id}')">
+      <span class="nav-icon">${item.icon}</span>
+      <span class="nav-label">${item.label}</span>
+    </div>
+  `).join('');
+  
+  const defaultPage = currentUser.role === 'student' ? 'student-dashboard' : (currentUser.role === 'counsellor' ? 'counsellor-dashboard' : 'admin-dashboard');
+  navigateTo(defaultPage);
+  
+  if (currentUser.role === 'student') {
+    loadStudentStats();
+  } else if (currentUser.role === 'counsellor') {
+    loadCounsellorData();
+  } else {
+    loadAdminData();
+  }
+}
+
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+  const targetPage = document.getElementById(`page-${pageId}`);
+  if (targetPage) targetPage.classList.add('active');
+  
+  if (pageId === 'student-chat') loadChatHistory();
+}
+
+// ============================================
+// CHAT FUNCTIONS
+// ============================================
 async function loadChatHistory() {
+  if (!currentUser) return;
   try {
     const response = await fetch(`/.netlify/functions/get-history?userId=${currentUser.id}`);
     const data = await response.json();
     if (data.messages && data.messages.length > 0) {
       messages = data.messages.map(m => ({
-        role: m.sender === 'user' ? 'user' : 'assistant',
+        role: m.sender === 'user' ? 'user' : 'bot',
         text: m.message,
         time: new Date(m.created_at)
       }));
       renderMessages();
     }
   } catch (err) {
-    console.error('Failed to load history:', err);
+    console.error(err);
   }
-}
-
-function addMessage(role, text) {
-  messages.push({ role: role, text: text, time: new Date() });
-  renderMessages();
 }
 
 function renderMessages() {
   const container = document.getElementById('chatMessages');
+  if (!container) return;
+  
+  if (messages.length === 0) {
+    container.innerHTML = `<div class="message bot"><div class="message-content">Hello! I'm Dr. Kamau. How are you feeling today?</div><div class="message-time">Just now</div></div>`;
+    return;
+  }
+  
   container.innerHTML = messages.map(msg => `
-    <div class="message ${msg.role === 'user' ? 'user' : 'bot'}">
+    <div class="message ${msg.role}">
       <div class="message-content">${escapeHtml(msg.text)}</div>
-      <div class="time">${formatTime(msg.time)}</div>
+      <div class="message-time">${formatTime(msg.time)}</div>
     </div>
   `).join('');
+  
   if (isTyping) {
     container.innerHTML += `<div class="message bot"><div class="typing"><span></span><span></span><span></span></div></div>`;
   }
   container.scrollTop = container.scrollHeight;
-}
-
-function escapeHtml(text) {
-  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function formatTime(date) {
-  return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 async function sendMessage() {
@@ -424,7 +792,6 @@ async function sendMessage() {
   
   addMessage('user', text);
   input.value = '';
-  
   isTyping = true;
   renderMessages();
   
@@ -435,27 +802,76 @@ async function sendMessage() {
       body: JSON.stringify({
         message: text,
         userId: currentUser.id,
-        history: messages.slice(-10).filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({ 
-          role: m.role === 'user' ? 'user' : 'assistant', 
-          content: m.text 
-        }))
+        history: messages.slice(-10).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))
       })
     });
-    
     const data = await response.json();
-    
-    if (data.response) {
-      addMessage('assistant', data.response);
-    } else {
-      addMessage('assistant', "I'm here with you. Could you tell me more?");
-    }
+    addMessage('bot', data.response || "I'm here for you. Tell me more.");
   } catch (err) {
-    console.error('Chat error:', err);
-    addMessage('assistant', "I'm having trouble connecting. Please try again.");
+    addMessage('bot', "I'm having trouble connecting. Please try again.");
   }
   
   isTyping = false;
   renderMessages();
+}
+
+function addMessage(role, text) {
+  messages.push({ role, text, time: new Date() });
+  renderMessages();
+}
+
+// ============================================
+// DATA LOADING
+// ============================================
+function loadStudentStats() {
+  document.getElementById('lastPhqScore').textContent = '8';
+  document.getElementById('lastGadScore').textContent = '5';
+  document.getElementById('avgMood').textContent = '6.2';
+  document.getElementById('chatCount').textContent = '12';
+}
+
+async function loadCounsellorData() {
+  try {
+    const response = await fetch('/.netlify/functions/get-students');
+    const data = await response.json();
+    if (data.students) {
+      document.getElementById('studentsTableBody').innerHTML = data.students.map(s => `
+        <tr><td>${escapeHtml(s.full_name || 'Unknown')}</td><td>${escapeHtml(s.email)}</td><td><span class="badge badge-success">Active</span></td><td><button class="btn btn-secondary btn-sm" onclick="alert('Chat with student')">Message</button></td></tr>
+      `).join('');
+      document.getElementById('totalStudents').textContent = data.students.length;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function loadAdminData() {
+  try {
+    const response = await fetch('/.netlify/functions/get-admin-stats');
+    const data = await response.json();
+    document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+    document.getElementById('totalMessages').textContent = data.totalMessages || 0;
+    if (data.users) {
+      document.getElementById('adminUsersTable').innerHTML = data.users.map(u => `
+        <tr><td>${escapeHtml(u.full_name)}</td><td>${escapeHtml(u.email)}</td><td><span class="badge badge-info">${u.role}</span></td></tr>
+      `).join('');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function formatTime(date) {
+  return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function showRegister() {
@@ -468,8 +884,13 @@ function showLogin() {
   document.getElementById('loginScreen').classList.remove('hidden');
 }
 
-// Initial render
-renderMessages();
+function startAssessment(type) {
+  alert(`Starting ${type.toUpperCase()} assessment. This feature will be fully implemented soon.`);
+}
+
+function openResource(title) {
+  alert(`Opening resource: ${title}`);
+}
 </script>
 </body>
 </html>
