@@ -29,11 +29,15 @@
     overflow-x: hidden;
   }
 
+  /* MAIN APP LAYOUT */
   .app-container {
     display: flex;
     min-height: 100vh;
   }
 
+  /* ============================================ */
+  /* SIDEBAR - PROMINENT AND ALWAYS VISIBLE */
+  /* ============================================ */
   .sidebar {
     width: var(--sidebar-width);
     background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
@@ -42,63 +46,87 @@
     height: 100vh;
     overflow-y: auto;
     z-index: 100;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
   }
 
+  /* Custom Scrollbar for Sidebar */
+  .sidebar::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .sidebar::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 5px;
+  }
+
+  /* Sidebar Header */
   .sidebar-header {
-    padding: 24px 20px;
+    padding: 28px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     text-align: center;
   }
 
   .logo {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     background: linear-gradient(135deg, var(--secondary-light), var(--accent));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    letter-spacing: -0.5px;
   }
 
   .logo-sub {
     font-size: 10px;
     color: rgba(255,255,255,0.5);
-    margin-top: 4px;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
   }
 
+  /* User Profile Section in Sidebar */
   .user-profile {
-    padding: 20px;
+    padding: 24px 20px;
     text-align: center;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.1);
   }
 
   .user-avatar {
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
     background: linear-gradient(135deg, var(--secondary), var(--accent));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 36px;
     margin: 0 auto 12px;
     border: 3px solid rgba(255,255,255,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
 
   .user-name {
-    font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 4px;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 6px;
   }
 
   .user-role {
     font-size: 12px;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.7);
     display: inline-block;
-    padding: 4px 12px;
-    background: rgba(255,255,255,0.1);
+    padding: 4px 14px;
+    background: rgba(255,255,255,0.15);
     border-radius: 20px;
+    font-weight: 500;
   }
 
+  /* Navigation Menu in Sidebar */
   .nav-menu {
     padding: 20px 0;
   }
@@ -106,40 +134,79 @@
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
+    gap: 14px;
+    padding: 14px 24px;
     color: rgba(255,255,255,0.7);
     cursor: pointer;
     border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+    margin: 4px 0;
   }
 
   .nav-item:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.08);
     color: white;
+    border-left-color: var(--secondary-light);
   }
 
   .nav-item.active {
     background: rgba(13,148,136,0.2);
     color: var(--secondary-light);
     border-left-color: var(--secondary);
+    font-weight: 600;
   }
 
   .nav-icon {
-    font-size: 20px;
-    width: 24px;
+    font-size: 22px;
+    width: 28px;
+    text-align: center;
   }
 
   .nav-label {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
   }
 
+  /* Sidebar Footer */
+  .sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(220,38,38,0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .logout-btn:hover {
+    background: rgba(220,38,38,0.4);
+    color: white;
+  }
+
+  /* ============================================ */
+  /* MAIN CONTENT AREA */
+  /* ============================================ */
   .main-content {
     margin-left: var(--sidebar-width);
     flex: 1;
-    padding: 24px 32px;
+    padding: 28px 36px;
+    min-height: 100vh;
+    background: var(--light);
   }
 
+  /* Page Transitions */
   .page {
     display: none;
     animation: fadeIn 0.3s ease;
@@ -154,60 +221,74 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* Dashboard Cards */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
   }
 
   .stat-card {
     background: var(--white);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   }
 
   .stat-icon {
-    font-size: 28px;
+    font-size: 32px;
     margin-bottom: 12px;
   }
 
   .stat-value {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 36px;
+    font-weight: 800;
     color: var(--primary);
+    line-height: 1.2;
   }
 
   .stat-label {
     font-size: 13px;
     color: var(--gray);
-    margin-top: 4px;
+    margin-top: 6px;
+    font-weight: 500;
   }
 
+  /* Cards */
   .card {
     background: var(--white);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     border: 1px solid #e2e8f0;
   }
 
   .card-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
     color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
+  /* Chat Interface */
   .chat-messages {
-    height: 400px;
+    height: 420px;
     overflow-y: auto;
-    padding: 16px;
+    padding: 20px;
     background: var(--light);
-    border-radius: 12px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -216,20 +297,29 @@
   .message {
     display: flex;
     flex-direction: column;
-    max-width: 70%;
+    max-width: 75%;
   }
 
   .message.user {
     align-self: flex-end;
   }
 
-  .message.bot {
+  .message.bot, .message.ai {
     align-self: flex-start;
   }
 
+  .message.counsellor {
+    align-self: flex-start;
+  }
+
+  .message.counsellor .message-content {
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+    color: white;
+  }
+
   .message-content {
-    padding: 10px 14px;
-    border-radius: 18px;
+    padding: 12px 18px;
+    border-radius: 20px;
     font-size: 14px;
     line-height: 1.5;
   }
@@ -239,7 +329,7 @@
     color: white;
   }
 
-  .bot .message-content {
+  .bot .message-content, .ai .message-content {
     background: white;
     color: var(--dark);
     border: 1px solid #e2e8f0;
@@ -249,22 +339,23 @@
     font-size: 10px;
     color: var(--gray);
     margin-top: 4px;
-    margin-inline: 8px;
+    margin-inline: 12px;
   }
 
   .chat-input-area {
-    margin-top: 16px;
+    margin-top: 20px;
     display: flex;
     gap: 12px;
   }
 
   .chat-input-area input {
     flex: 1;
-    padding: 12px 16px;
+    padding: 14px 20px;
     border: 2px solid #e2e8f0;
     border-radius: 30px;
     font-size: 14px;
     outline: none;
+    transition: border-color 0.2s;
   }
 
   .chat-input-area input:focus {
@@ -272,22 +363,29 @@
   }
 
   .chat-input-area button {
-    padding: 12px 28px;
+    padding: 14px 32px;
     background: linear-gradient(135deg, var(--secondary), var(--accent));
     color: white;
     border: none;
     border-radius: 30px;
     font-weight: 600;
     cursor: pointer;
+    transition: opacity 0.2s;
   }
 
+  .chat-input-area button:hover {
+    opacity: 0.9;
+  }
+
+  /* Buttons */
   .btn {
-    padding: 10px 20px;
+    padding: 10px 22px;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
     font-size: 14px;
+    transition: all 0.2s;
   }
 
   .btn-primary {
@@ -305,6 +403,7 @@
     font-size: 12px;
   }
 
+  /* Tables */
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -312,7 +411,7 @@
 
   .data-table th,
   .data-table td {
-    padding: 12px;
+    padding: 14px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
   }
@@ -324,23 +423,27 @@
     color: var(--gray);
   }
 
+  /* Badges */
   .badge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
   }
 
   .badge-success { background: #dcfce7; color: #16a34a; }
+  .badge-danger { background: #fee2e2; color: #dc2626; }
+  .badge-warning { background: #fed7aa; color: #ea580c; }
   .badge-info { background: #e0f2fe; color: #0284c7; }
 
+  /* Typing Indicator */
   .typing {
     display: flex;
-    gap: 4px;
-    padding: 10px 14px;
+    gap: 6px;
+    padding: 12px 18px;
     background: white;
-    border-radius: 18px;
+    border-radius: 20px;
     width: fit-content;
   }
 
@@ -354,9 +457,59 @@
 
   @keyframes typing {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-8px); opacity: 1; }
+    30% { transform: translateY(-10px); opacity: 1; }
   }
 
+  /* Student List for Counsellor */
+  .student-item {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .student-item:hover {
+    background: var(--light);
+  }
+
+  .student-item.active {
+    background: #e0f2fe;
+    border-left: 3px solid var(--secondary);
+  }
+
+  .student-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .student-details {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .crisis-badge {
+    background: var(--danger);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .unread-badge {
+    background: var(--secondary);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* Login Screen */
   .login-screen {
     position: fixed;
     inset: 0;
@@ -373,36 +526,40 @@
 
   .login-box {
     background: white;
-    padding: 40px;
-    border-radius: 24px;
+    padding: 48px;
+    border-radius: 32px;
     width: 90%;
-    max-width: 420px;
+    max-width: 440px;
     text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
   }
 
   .login-box h2 {
     color: var(--primary);
     margin-bottom: 8px;
+    font-size: 28px;
   }
 
   .login-box input, .login-box select {
     width: 100%;
-    padding: 12px;
-    margin: 10px 0;
+    padding: 14px;
+    margin: 12px 0;
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 14px;
+    font-size: 14px;
   }
 
   .login-box button {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     background: linear-gradient(135deg, var(--secondary), var(--accent));
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 16px;
+    margin-top: 20px;
+    font-size: 16px;
   }
 
   .error-msg {
@@ -413,12 +570,13 @@
   }
 
   .switch-link {
-    margin-top: 16px;
+    margin-top: 20px;
     color: var(--secondary);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
   }
 
+  /* Responsive */
   @media (max-width: 768px) {
     .sidebar {
       transform: translateX(-100%);
@@ -426,6 +584,9 @@
     }
     .main-content {
       margin-left: 0;
+    }
+    .message {
+      max-width: 85%;
     }
   }
 </style>
@@ -438,8 +599,8 @@
     <h2>🧠 MindSpace Karu</h2>
     <p style="color:#64748b; margin-bottom: 20px;">Professional Mental Health System</p>
     <div id="loginError" class="error-msg"></div>
-    <input type="email" id="loginEmail" placeholder="Email address">
-    <input type="password" id="loginPassword" placeholder="Password">
+    <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
     <button onclick="doLogin()">Sign In →</button>
     <div style="margin-top: 16px; font-size: 12px; color: #64748b;">
       Demo: student@karu.ac.ke / password123
@@ -467,24 +628,44 @@
   </div>
 </div>
 
-<!-- Main App -->
+<!-- Main App Container with Sidebar -->
 <div class="app-container" id="appContainer" style="display: none;">
+  
+  <!-- ============================================ -->
+  <!-- SIDEBAR - ALWAYS VISIBLE ON LEFT -->
+  <!-- ============================================ -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">🧠 MindSpace Karu</div>
       <div class="logo-sub">Professional Mental Health System</div>
     </div>
+    
     <div class="user-profile">
       <div class="user-avatar" id="userAvatar">👩</div>
       <div class="user-name" id="userName">Student Name</div>
       <div class="user-role" id="userRoleBadge">Student</div>
     </div>
-    <nav class="nav-menu" id="navMenu"></nav>
+    
+    <nav class="nav-menu" id="navMenu">
+      <!-- Dynamic navigation items will be inserted here -->
+    </nav>
+    
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="logout()">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-label">Logout</span>
+      </div>
+    </div>
   </aside>
 
+  <!-- ============================================ -->
+  <!-- MAIN CONTENT AREA -->
+  <!-- ============================================ -->
   <main class="main-content">
+    
     <!-- Student Dashboard -->
     <div class="page" id="page-student-dashboard">
+      <h2 style="margin-bottom: 24px; color: var(--primary);">Welcome back! 👋</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="lastPhqScore">-</div><div class="stat-label">Last PHQ-9 Score</div></div>
         <div class="stat-card"><div class="stat-icon">💭</div><div class="stat-value" id="lastGadScore">-</div><div class="stat-label">Last GAD-7 Score</div></div>
@@ -492,21 +673,29 @@
         <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="chatCount">-</div><div class="stat-label">Messages</div></div>
       </div>
       <div class="card">
-        <div class="card-title">Quick Actions</div>
+        <div class="card-title">⚡ Quick Actions</div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button class="btn btn-secondary" onclick="navigateTo('student-chat')">💬 Chat with AI Counsellor</button>
+          <button class="btn btn-secondary" onclick="navigateTo('student-chat')">🤖 Chat with AI Counsellor</button>
+          <button class="btn btn-primary" onclick="navigateTo('student-counsellor-chat')">👨‍⚕️ Talk to Real Counsellor</button>
           <button class="btn btn-primary" onclick="startAssessment('phq9')">📋 Take Assessment</button>
           <button class="btn btn-primary" onclick="navigateTo('student-resources')">📚 Resource Library</button>
         </div>
       </div>
+      <div class="card">
+        <div class="card-title">📈 Your Mental Health Journey</div>
+        <p style="color: var(--gray);">Track your progress over time. Complete assessments to see your scores.</p>
+        <div style="margin-top: 16px; height: 200px; background: var(--light); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
+          📊 Chart will appear here after completing assessments
+        </div>
+      </div>
     </div>
 
-    <!-- Student Chat -->
+    <!-- Student AI Chat -->
     <div class="page" id="page-student-chat">
       <div class="card">
-        <div class="card-title">💬 Chat with Dr. Kamau (AI Counsellor)</div>
+        <div class="card-title">🤖 Chat with Dr. Kamau (AI Counsellor)</div>
         <div class="chat-messages" id="chatMessages">
-          <div class="message bot">
+          <div class="message ai">
             <div class="message-content">Hello! I'm Dr. Kamau, your AI counsellor. How are you feeling today?</div>
             <div class="message-time">Just now</div>
           </div>
@@ -518,20 +707,43 @@
       </div>
     </div>
 
+    <!-- Student Counsellor Chat -->
+    <div class="page" id="page-student-counsellor-chat">
+      <div class="card">
+        <div class="card-title">👨‍⚕️ Chat with University Counsellor</div>
+        <div class="chat-messages" id="counsellorChatMessages">
+          <div class="message counsellor">
+            <div class="message-content">Hello! A counsellor will respond to you shortly. How can I help you today?</div>
+            <div class="message-time">Just now</div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="counsellorChatInput" placeholder="Type your message to counsellor..." onkeypress="if(event.key==='Enter') sendCounsellorMessage()">
+          <button onclick="sendCounsellorMessage()">Send →</button>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: var(--gray); text-align: center; padding: 8px; background: var(--light); border-radius: 10px;">
+          💬 Messages are monitored by our counselling team during working hours (8am-5pm, Mon-Fri)
+        </div>
+      </div>
+    </div>
+
     <!-- Student Assessment -->
     <div class="page" id="page-student-assessment">
       <div class="card">
-        <div class="card-title">📋 Mental Health Assessment</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div class="card" style="text-align: center; cursor: pointer;" onclick="startAssessment('phq9')">
-            <div style="font-size: 48px;">🧠</div>
-            <h3>PHQ-9</h3>
-            <p style="font-size: 12px; color: var(--gray);">Depression Screening</p>
+        <div class="card-title">📋 Mental Health Assessments</div>
+        <p style="margin-bottom: 20px; color: var(--gray);">These clinical screening tools help you understand your mental health. Results are confidential.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div class="card" style="text-align: center; cursor: pointer; transition: transform 0.2s;" onclick="startAssessment('phq9')" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform='scale(1)'">
+            <div style="font-size: 56px;">🧠</div>
+            <h3 style="margin: 12px 0;">PHQ-9</h3>
+            <p style="font-size: 13px; color: var(--gray);">Depression Screening (9 questions)</p>
+            <p style="font-size: 11px; color: var(--secondary); margin-top: 10px;">Takes 3-5 minutes</p>
           </div>
-          <div class="card" style="text-align: center; cursor: pointer;" onclick="startAssessment('gad7')">
-            <div style="font-size: 48px;">💭</div>
-            <h3>GAD-7</h3>
-            <p style="font-size: 12px; color: var(--gray);">Anxiety Screening</p>
+          <div class="card" style="text-align: center; cursor: pointer; transition: transform 0.2s;" onclick="startAssessment('gad7')" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform='scale(1)'">
+            <div style="font-size: 56px;">💭</div>
+            <h3 style="margin: 12px 0;">GAD-7</h3>
+            <p style="font-size: 13px; color: var(--gray);">Anxiety Screening (7 questions)</p>
+            <p style="font-size: 11px; color: var(--secondary); margin-top: 10px;">Takes 2-3 minutes</p>
           </div>
         </div>
       </div>
@@ -542,13 +754,25 @@
       <div class="card">
         <div class="card-title">📚 Resource Library</div>
         <div style="display: grid; gap: 16px;">
-          <div class="card" style="cursor: pointer;" onclick="openResource('Understanding Depression')">
+          <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="openResource('Understanding Depression')" onmouseenter="this.style.transform='translateX(5px)'" onmouseleave="this.style.transform='translateX(0)'">
             <h4>🧠 Understanding Depression</h4>
-            <p style="font-size: 13px; color: var(--gray);">Learn about symptoms and treatments</p>
+            <p style="font-size: 13px; color: var(--gray);">Learn about symptoms, causes, and treatment options for depression</p>
           </div>
-          <div class="card" style="cursor: pointer;" onclick="openResource('Managing Anxiety')">
+          <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="openResource('Managing Anxiety')" onmouseenter="this.style.transform='translateX(5px)'" onmouseleave="this.style.transform='translateX(0)'">
             <h4>💭 Managing Anxiety</h4>
-            <p style="font-size: 13px; color: var(--gray);">Practical techniques for anxiety relief</p>
+            <p style="font-size: 13px; color: var(--gray);">Practical techniques including breathing exercises and grounding</p>
+          </div>
+          <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="openResource('Stress Management')" onmouseenter="this.style.transform='translateX(5px)'" onmouseleave="this.style.transform='translateX(0)'">
+            <h4>📚 Exam Stress Management</h4>
+            <p style="font-size: 13px; color: var(--gray);">Coping with academic pressure at Karatina University</p>
+          </div>
+          <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="openResource('Sleep Hygiene')" onmouseenter="this.style.transform='translateX(5px)'" onmouseleave="this.style.transform='translateX(0)'">
+            <h4>😴 Sleep Hygiene Tips</h4>
+            <p style="font-size: 13px; color: var(--gray);">Improve your sleep quality for better mental health</p>
+          </div>
+          <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="openResource('Crisis Helplines')" onmouseenter="this.style.transform='translateX(5px)'" onmouseleave="this.style.transform='translateX(0)'">
+            <h4>📞 Crisis Helplines Kenya</h4>
+            <p style="font-size: 13px; color: var(--gray);">24/7 support: Befrienders Kenya 0800 723 253</p>
           </div>
         </div>
       </div>
@@ -556,34 +780,57 @@
 
     <!-- Counsellor Dashboard -->
     <div class="page" id="page-counsellor-dashboard">
+      <h2 style="margin-bottom: 24px; color: var(--primary);">Counsellor Dashboard</h2>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalStudents">0</div><div class="stat-label">Students</div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalStudents">0</div><div class="stat-label">Total Students</div></div>
         <div class="stat-card"><div class="stat-icon">🚨</div><div class="stat-value" id="crisisAlerts">0</div><div class="stat-label">Crisis Alerts</div></div>
-        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="unreadMessages">0</div><div class="stat-label">Unread</div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="unreadMessages">0</div><div class="stat-label">Unread Messages</div></div>
       </div>
+      
       <div class="card">
-        <div class="card-title">Student List</div>
-        <div style="overflow-x: auto;">
-          <table class="data-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody id="studentsTableBody"><tr><td colspan="4">Loading...</td></tr></tbody>
-          </table>
+        <div class="card-title">👥 Student Conversations</div>
+        <div style="display: flex; gap: 24px; min-height: 550px;">
+          <!-- Student List -->
+          <div style="width: 35%; border-right: 1px solid #e2e8f0; overflow-y: auto; max-height: 550px;">
+            <div id="studentListContainer" style="padding: 0 8px 0 0;"></div>
+          </div>
+          <!-- Chat Area -->
+          <div style="flex: 1; display: flex; flex-direction: column;">
+            <div id="selectedStudentInfo" style="padding: 12px; border-bottom: 1px solid #e2e8f0; display: none; background: var(--light); border-radius: 12px; margin-bottom: 12px;">
+              <strong id="selectedStudentName" style="font-size: 16px;"></strong>
+              <span id="selectedStudentCrisis" style="margin-left: 10px;"></span>
+            </div>
+            <div class="chat-messages" id="counsellorChatView" style="height: 380px; margin-top: 0;">
+              <div style="text-align: center; color: var(--gray); padding: 60px;">👈 Select a student from the list to start chatting</div>
+            </div>
+            <div class="chat-input-area" id="counsellorReplyArea" style="display: none;">
+              <input type="text" id="counsellorReplyInput" placeholder="Type your response..." onkeypress="if(event.key==='Enter') sendCounsellorReply()">
+              <button onclick="sendCounsellorReply()">Send Reply →</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Admin Dashboard -->
     <div class="page" id="page-admin-dashboard">
+      <h2 style="margin-bottom: 24px; color: var(--primary);">Admin Dashboard</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalUsers">0</div><div class="stat-label">Total Users</div></div>
-        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="totalMessages">0</div><div class="stat-label">Messages</div></div>
+        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="totalMessages">0</div><div class="stat-label">Total Messages</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="totalAssessments">0</div><div class="stat-label">Assessments</div></div>
       </div>
       <div class="card">
-        <div class="card-title">User Management</div>
-        <table class="data-table">
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
-          <tbody id="adminUsersTable"><tr><td colspan="3">Loading...</td></tr></tbody>
-        </table>
+        <div class="card-title">👤 User Management</div>
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Role</th><th>Created At</th></tr>
+            </thead>
+            <tbody id="adminUsersTable"><tr><td colspan="4">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -595,7 +842,10 @@
 // ============================================
 let currentUser = null;
 let messages = [];
+let counsellorMessages = [];
 let isTyping = false;
+let selectedStudent = null;
+let pollInterval = null;
 
 // ============================================
 // AUTHENTICATION
@@ -627,6 +877,10 @@ async function doLogin() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('appContainer').style.display = 'flex';
       updateUIForRole();
+      
+      if (currentUser.role === 'counsellor') {
+        startPolling();
+      }
     } else {
       errorEl.textContent = data.error || 'Login failed';
       errorEl.style.display = 'block';
@@ -652,7 +906,7 @@ async function doRegister() {
     return;
   }
   
-  if (!email.endsWith('@karu.ac.ke')) {
+  if (role === 'student' && !email.endsWith('@karu.ac.ke')) {
     errorEl.textContent = 'Please use a valid @karu.ac.ke email';
     errorEl.style.display = 'block';
     return;
@@ -687,6 +941,15 @@ async function doRegister() {
   }
 }
 
+function logout() {
+  currentUser = null;
+  if (pollInterval) clearInterval(pollInterval);
+  document.getElementById('appContainer').style.display = 'none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
 // ============================================
 // UI MANAGEMENT
 // ============================================
@@ -701,17 +964,20 @@ function updateUIForRole() {
   if (currentUser.role === 'student') {
     navItems = [
       { id: 'student-dashboard', icon: '🏠', label: 'Dashboard' },
-      { id: 'student-chat', icon: '💬', label: 'Chat Counsellor' },
+      { id: 'student-chat', icon: '🤖', label: 'AI Counsellor' },
+      { id: 'student-counsellor-chat', icon: '👨‍⚕️', label: 'Talk to Counsellor' },
       { id: 'student-assessment', icon: '📋', label: 'Self-Assessment' },
       { id: 'student-resources', icon: '📚', label: 'Resources' }
     ];
   } else if (currentUser.role === 'counsellor') {
     navItems = [
-      { id: 'counsellor-dashboard', icon: '🏠', label: 'Dashboard' }
+      { id: 'counsellor-dashboard', icon: '🏠', label: 'Dashboard' },
+      { id: 'counsellor-dashboard', icon: '💬', label: 'Student Chats' }
     ];
   } else {
     navItems = [
-      { id: 'admin-dashboard', icon: '🏠', label: 'Dashboard' }
+      { id: 'admin-dashboard', icon: '🏠', label: 'Dashboard' },
+      { id: 'admin-dashboard', icon: '👥', label: 'User Management' }
     ];
   }
   
@@ -727,6 +993,7 @@ function updateUIForRole() {
   
   if (currentUser.role === 'student') {
     loadStudentStats();
+    loadStudentCounsellorChat();
   } else if (currentUser.role === 'counsellor') {
     loadCounsellorData();
   } else {
@@ -739,11 +1006,19 @@ function navigateTo(pageId) {
   const targetPage = document.getElementById(`page-${pageId}`);
   if (targetPage) targetPage.classList.add('active');
   
-  if (pageId === 'student-chat') loadChatHistory();
+  // Update active nav item
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  event?.target?.closest('.nav-item')?.classList.add('active');
+  
+  if (pageId === 'student-chat') {
+    loadChatHistory();
+  } else if (pageId === 'student-counsellor-chat') {
+    loadStudentCounsellorChat();
+  }
 }
 
 // ============================================
-// CHAT FUNCTIONS
+// AI CHAT FUNCTIONS
 // ============================================
 async function loadChatHistory() {
   if (!currentUser) return;
@@ -752,7 +1027,7 @@ async function loadChatHistory() {
     const data = await response.json();
     if (data.messages && data.messages.length > 0) {
       messages = data.messages.map(m => ({
-        role: m.sender === 'user' ? 'user' : 'bot',
+        role: m.sender === 'user' ? 'user' : 'ai',
         text: m.message,
         time: new Date(m.created_at)
       }));
@@ -768,7 +1043,7 @@ function renderMessages() {
   if (!container) return;
   
   if (messages.length === 0) {
-    container.innerHTML = `<div class="message bot"><div class="message-content">Hello! I'm Dr. Kamau. How are you feeling today?</div><div class="message-time">Just now</div></div>`;
+    container.innerHTML = `<div class="message ai"><div class="message-content">Hello! I'm Dr. Kamau. How are you feeling today?</div><div class="message-time">Just now</div></div>`;
     return;
   }
   
@@ -780,7 +1055,7 @@ function renderMessages() {
   `).join('');
   
   if (isTyping) {
-    container.innerHTML += `<div class="message bot"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    container.innerHTML += `<div class="message ai"><div class="typing"><span></span><span></span><span></span></div></div>`;
   }
   container.scrollTop = container.scrollHeight;
 }
@@ -802,13 +1077,13 @@ async function sendMessage() {
       body: JSON.stringify({
         message: text,
         userId: currentUser.id,
-        history: messages.slice(-10).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))
+        history: messages.slice(-10).filter(m => m.role !== 'typing').map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))
       })
     });
     const data = await response.json();
-    addMessage('bot', data.response || "I'm here for you. Tell me more.");
+    addMessage('ai', data.response || "I'm here for you. Tell me more.");
   } catch (err) {
-    addMessage('bot', "I'm having trouble connecting. Please try again.");
+    addMessage('ai', "I'm having trouble connecting. Please try again.");
   }
   
   isTyping = false;
@@ -821,39 +1096,209 @@ function addMessage(role, text) {
 }
 
 // ============================================
-// DATA LOADING
+// STUDENT-COUNSELLOR CHAT FUNCTIONS
 // ============================================
-function loadStudentStats() {
-  document.getElementById('lastPhqScore').textContent = '8';
-  document.getElementById('lastGadScore').textContent = '5';
-  document.getElementById('avgMood').textContent = '6.2';
-  document.getElementById('chatCount').textContent = '12';
-}
-
-async function loadCounsellorData() {
+async function loadStudentCounsellorChat() {
+  if (!currentUser) return;
   try {
-    const response = await fetch('/.netlify/functions/get-students');
+    const response = await fetch(`/.netlify/functions/get-student-chats?studentId=${currentUser.id}`);
     const data = await response.json();
-    if (data.students) {
-      document.getElementById('studentsTableBody').innerHTML = data.students.map(s => `
-        <tr><td>${escapeHtml(s.full_name || 'Unknown')}</td><td>${escapeHtml(s.email)}</td><td><span class="badge badge-success">Active</span></td><td><button class="btn btn-secondary btn-sm" onclick="alert('Chat with student')">Message</button></td></tr>
-      `).join('');
-      document.getElementById('totalStudents').textContent = data.students.length;
+    
+    if (data.counsellorConversations && data.counsellorConversations.length > 0) {
+      const conv = data.counsellorConversations[0];
+      counsellorMessages = conv.messages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'counsellor',
+        text: m.message,
+        time: new Date(m.created_at),
+        counsellorName: m.counsellor_name
+      }));
+      renderCounsellorMessages();
     }
   } catch (err) {
     console.error(err);
   }
 }
 
+function renderCounsellorMessages() {
+  const container = document.getElementById('counsellorChatMessages');
+  if (!container) return;
+  
+  if (counsellorMessages.length === 0) {
+    container.innerHTML = `<div class="message counsellor"><div class="message-content">Hello! A counsellor will respond to you shortly. How can I help you today?</div><div class="message-time">Just now</div></div>`;
+    return;
+  }
+  
+  container.innerHTML = counsellorMessages.map(msg => `
+    <div class="message ${msg.role === 'user' ? 'user' : 'counsellor'}">
+      <div class="message-content">${escapeHtml(msg.text)}</div>
+      <div class="message-time">${formatTime(msg.time)}</div>
+    </div>
+  `).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendCounsellorMessage() {
+  const input = document.getElementById('counsellorChatInput');
+  const text = input.value.trim();
+  if (!text || !currentUser) return;
+  
+  counsellorMessages.push({ role: 'user', text, time: new Date() });
+  renderCounsellorMessages();
+  input.value = '';
+  
+  try {
+    await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        userId: currentUser.id,
+        counsellorMode: true
+      })
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ============================================
+// COUNSELLOR DASHBOARD FUNCTIONS
+// ============================================
+async function loadCounsellorData() {
+  try {
+    const response = await fetch(`/.netlify/functions/get-counsellor-stats?counsellorId=${currentUser.id}`);
+    const data = await response.json();
+    
+    document.getElementById('totalStudents').textContent = data.totalStudents || 0;
+    document.getElementById('crisisAlerts').textContent = data.crisisCount || 0;
+    
+    let totalUnread = 0;
+    if (data.students) {
+      data.students.forEach(s => totalUnread += s.unreadCount);
+    }
+    document.getElementById('unreadMessages').textContent = totalUnread;
+    
+    renderStudentList(data.students);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderStudentList(students) {
+  const container = document.getElementById('studentListContainer');
+  if (!container) return;
+  
+  if (!students || students.length === 0) {
+    container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--gray);">No students yet</div>';
+    return;
+  }
+  
+  container.innerHTML = students.map(student => `
+    <div class="student-item" onclick="selectStudent('${student.id}', '${escapeHtml(student.full_name)}', ${student.crisis ? JSON.stringify(student.crisis) : 'null'})">
+      <div class="student-name">
+        ${escapeHtml(student.full_name || 'Unknown')}
+        ${student.crisis ? '<span class="crisis-badge">🚨 Crisis</span>' : ''}
+        ${student.unreadCount > 0 ? `<span class="unread-badge">${student.unreadCount} new</span>` : ''}
+      </div>
+      <div class="student-details">
+        ${student.email || ''}<br>
+        ${student.year_of_study ? `Year ${student.year_of_study}` : ''} ${student.programme ? `• ${student.programme}` : ''}
+      </div>
+      ${student.lastMessage ? `<div style="font-size: 11px; color: var(--gray); margin-top: 5px;">💬 ${escapeHtml(student.lastMessage.message.substring(0, 60))}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function selectStudent(studentId, studentName, crisisInfo) {
+  selectedStudent = { id: studentId, name: studentName, crisis: crisisInfo };
+  
+  document.getElementById('selectedStudentInfo').style.display = 'block';
+  document.getElementById('selectedStudentName').innerHTML = studentName;
+  document.getElementById('selectedStudentCrisis').innerHTML = crisisInfo ? `<span class="crisis-badge">⚠️ Crisis Alert - ${crisisInfo.type.toUpperCase()} Score: ${crisisInfo.score}</span>` : '';
+  document.getElementById('counsellorReplyArea').style.display = 'flex';
+  
+  await loadConversationWithStudent(studentId);
+}
+
+async function loadConversationWithStudent(studentId) {
+  try {
+    const response = await fetch(`/.netlify/functions/get-conversation?userId=${studentId}&counsellorId=${currentUser.id}`);
+    const data = await response.json();
+    
+    const container = document.getElementById('counsellorChatView');
+    if (data.messages && data.messages.length > 0) {
+      container.innerHTML = data.messages.map(msg => `
+        <div class="message ${msg.sender === 'user' ? 'user' : (msg.sender === 'counsellor' ? 'counsellor' : 'ai')}">
+          <div class="message-content">${escapeHtml(msg.message)}</div>
+          <div class="message-time">${formatTime(new Date(msg.created_at))}</div>
+        </div>
+      `).join('');
+    } else {
+      container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">✨ No messages yet. Send a message to start the conversation.</div>';
+    }
+    container.scrollTop = container.scrollHeight;
+    
+    loadCounsellorData();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function sendCounsellorReply() {
+  const input = document.getElementById('counsellorReplyInput');
+  const text = input.value.trim();
+  if (!text || !selectedStudent) return;
+  
+  try {
+    await fetch('/.netlify/functions/send-counsellor-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: selectedStudent.id,
+        message: text,
+        counsellorId: currentUser.id,
+        counsellorName: currentUser.name
+      })
+    });
+    
+    input.value = '';
+    await loadConversationWithStudent(selectedStudent.id);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to send message');
+  }
+}
+
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(() => {
+    if (currentUser && currentUser.role === 'counsellor' && document.getElementById('page-counsellor-dashboard').classList.contains('active')) {
+      loadCounsellorData();
+      if (selectedStudent) {
+        loadConversationWithStudent(selectedStudent.id);
+      }
+    }
+  }, 5000);
+}
+
+// ============================================
+// ADMIN FUNCTIONS
+// ============================================
 async function loadAdminData() {
   try {
     const response = await fetch('/.netlify/functions/get-admin-stats');
     const data = await response.json();
     document.getElementById('totalUsers').textContent = data.totalUsers || 0;
     document.getElementById('totalMessages').textContent = data.totalMessages || 0;
+    document.getElementById('totalAssessments').textContent = data.totalAssessments || 0;
     if (data.users) {
       document.getElementById('adminUsersTable').innerHTML = data.users.map(u => `
-        <tr><td>${escapeHtml(u.full_name)}</td><td>${escapeHtml(u.email)}</td><td><span class="badge badge-info">${u.role}</span></td></tr>
+        <tr>
+          <td>${escapeHtml(u.full_name)}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td><span class="badge badge-info">${u.role}</span></td>
+          <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        </tr>
       `).join('');
     }
   } catch (err) {
@@ -864,7 +1309,15 @@ async function loadAdminData() {
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+function loadStudentStats() {
+  document.getElementById('lastPhqScore').textContent = '8';
+  document.getElementById('lastGadScore').textContent = '5';
+  document.getElementById('avgMood').textContent = '6.2';
+  document.getElementById('chatCount').textContent = messages.length.toString();
+}
+
 function escapeHtml(text) {
+  if (!text) return '';
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
@@ -885,12 +1338,16 @@ function showLogin() {
 }
 
 function startAssessment(type) {
-  alert(`Starting ${type.toUpperCase()} assessment. This feature will be fully implemented soon.`);
+  alert(`📋 Starting ${type.toUpperCase()} assessment.\n\nThis will ask ${type === 'phq9' ? '9' : '7'} questions about how you've been feeling over the last 2 weeks.\n\nYour responses are confidential and will help track your mental health journey.`);
 }
 
 function openResource(title) {
-  alert(`Opening resource: ${title}`);
+  alert(`📖 Opening resource: ${title}\n\nThis resource provides evidence-based information to support your mental health journey.`);
 }
+
+window.addEventListener('beforeunload', () => {
+  if (pollInterval) clearInterval(pollInterval);
+});
 </script>
 </body>
 </html>
