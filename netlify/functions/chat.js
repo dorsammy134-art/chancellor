@@ -23,8 +23,8 @@ exports.handler = async (event) => {
     
     // Save user message to Neon DB
     await sql`
-      INSERT INTO chat_messages (user_id, message, sender)
-      VALUES (${userId}, ${message}, 'user')
+      INSERT INTO chat_messages (user_id, message, sender, is_read)
+      VALUES (${userId}, ${message}, 'user', false)
     `;
     
     let aiResponse = "I'm here with you. Could you tell me more about how you're feeling?";
@@ -68,47 +68,23 @@ Guidelines:
           aiResponse = data.choices[0].message.content;
         } else if (data.error) {
           console.error('Groq API error:', data.error);
+          // Fallback to rule-based responses
+          aiResponse = getFallbackResponse(message);
         }
       } catch (apiError) {
         console.error('Groq API error:', apiError);
-        // Smart fallback responses
-        const msg = message.toLowerCase();
-        if (msg.includes('exam') || msg.includes('test') || msg.includes('study')) {
-          aiResponse = "Exam stress is very common at Karu. Breaking your study into 25-minute Pomodoro sessions can help. Which subject feels most overwhelming right now?";
-        } else if (msg.includes('sleep') || msg.includes('tired')) {
-          aiResponse = "Sleep difficulties affect many students. Try keeping your phone away 30 minutes before bed. How many hours are you currently getting?";
-        } else if (msg.includes('anxi') || msg.includes('worry') || msg.includes('nervous')) {
-          aiResponse = "Anxiety can feel overwhelming. Here's a grounding technique: name 5 things you can see, 4 you can touch, 3 you can hear. Want to try it with me?";
-        } else if (msg.includes('sad') || msg.includes('depress') || msg.includes('hopeless')) {
-          aiResponse = "Thank you for trusting me with this. You don't have to carry this alone. How long have you been feeling this way?";
-        } else if (msg.includes('lonely') || msg.includes('alone')) {
-          aiResponse = "Loneliness at university is more common than people admit. Would you like to explore some ways to connect with others on campus?";
-        } else if (msg.includes('hello') || msg.includes('hi')) {
-          aiResponse = "Hello! How are you feeling today? I'm here to listen and support you.";
-        }
+        // Fallback to rule-based responses
+        aiResponse = getFallbackResponse(message);
       }
     } else {
       // No Groq API key - use rule-based responses
-      const msg = message.toLowerCase();
-      if (msg.includes('exam') || msg.includes('study')) {
-        aiResponse = "Exam stress is common. Breaking study into 25-minute sessions can help. Which subject feels most overwhelming?";
-      } else if (msg.includes('sleep')) {
-        aiResponse = "Sleep difficulties affect many students. Try keeping your phone away 30 minutes before bed.";
-      } else if (msg.includes('anxi')) {
-        aiResponse = "Anxiety can feel overwhelming. Try naming 5 things you can see, 4 you can touch, 3 you can hear.";
-      } else if (msg.includes('sad')) {
-        aiResponse = "Thank you for trusting me. You don't have to carry this alone. How long have you been feeling this way?";
-      } else if (msg.includes('hello') || msg.includes('hi')) {
-        aiResponse = "Hello! How are you feeling today?";
-      } else {
-        aiResponse = "Thank you for sharing. Could you tell me more about that?";
-      }
+      aiResponse = getFallbackResponse(message);
     }
     
     // Save AI response to Neon DB
     await sql`
-      INSERT INTO chat_messages (user_id, message, sender)
-      VALUES (${userId}, ${aiResponse}, 'ai')
+      INSERT INTO chat_messages (user_id, message, sender, is_read)
+      VALUES (${userId}, ${aiResponse}, 'ai', true)
     `;
     
     return {
@@ -125,3 +101,28 @@ Guidelines:
     };
   }
 };
+
+// Fallback rule-based responses when Groq API is unavailable
+function getFallbackResponse(message) {
+  const msg = message.toLowerCase();
+  
+  if (msg.includes('exam') || msg.includes('test') || msg.includes('study')) {
+    return "Exam stress is very common at Karu. Breaking your study into 25-minute Pomodoro sessions can help. Which subject feels most overwhelming right now?";
+  } else if (msg.includes('sleep') || msg.includes('tired')) {
+    return "Sleep difficulties affect many students. Try keeping your phone away 30 minutes before bed. How many hours are you currently getting?";
+  } else if (msg.includes('anxi') || msg.includes('worry') || msg.includes('nervous')) {
+    return "Anxiety can feel overwhelming. Here's a grounding technique: name 5 things you can see, 4 you can touch, 3 you can hear. Want to try it with me?";
+  } else if (msg.includes('sad') || msg.includes('depress') || msg.includes('hopeless')) {
+    return "Thank you for trusting me with this. You don't have to carry this alone. How long have you been feeling this way?";
+  } else if (msg.includes('lonely') || msg.includes('alone')) {
+    return "Loneliness at university is more common than people admit. Would you like to explore some ways to connect with others on campus?";
+  } else if (msg.includes('hello') || msg.includes('hi')) {
+    return "Hello! How are you feeling today? I'm here to listen and support you.";
+  } else if (msg.includes('helb') || msg.includes('money') || msg.includes('fees')) {
+    return "Financial stress is real. Have you spoken to the financial aid office at Karatina University? They have support programs for students.";
+  } else if (msg.includes('kill') || msg.includes('suicide') || msg.includes('die')) {
+    return "⚠️ I'm very concerned. Please reach out immediately to Befrienders Kenya: 0800 723 253 (free, 24/7). You matter and there are people who want to help you.";
+  }
+  
+  return "Thank you for sharing. Could you tell me more about how that's affecting your studies or daily life at Karatina University?";
+}
