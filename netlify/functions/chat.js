@@ -1,86 +1,116 @@
-// netlify/functions/chat.js
-// This runs on Netlify's servers - your API key stays SECURE here!
+const { neon } = require('@neondatabase/serverless');
 
 exports.handler = async (event) => {
-  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    const { message, history } = JSON.parse(event.body);
+    const { message, userId, history } = JSON.parse(event.body);
     
-    // Get your API key from Netlify environment variables
+    const DATABASE_URL = process.env.DATABASE_URL;
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
     
-    if (!GROQ_API_KEY) {
-      console.error('GROQ_API_KEY not set in environment variables');
+    if (!DATABASE_URL) {
+      console.error('DATABASE_URL not set');
       return {
-        statusCode: 200,
-        body: JSON.stringify({ 
-          response: "I'm here to help. Could you tell me more about what's on your mind?" 
-        })
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Database configuration missing' })
       };
     }
-
-    // Prepare conversation history for context
-    const messages = [
-      {
-        role: 'system',
-        content: `You are Dr. Kamau Njoroge, a compassionate and professional university counsellor at Karatina University in Kenya. 
-You are speaking with a student through a confidential mental health support platform.
-
-Your guidelines:
+    
+    const sql = neon(DATABASE_URL);
+    
+    // Save user message to Neon DB
+    await sql`
+      INSERT INTO chat_messages (user_id, message, sender)
+      VALUES (${userId}, ${message}, 'user')
+    `;
+    
+    let aiResponse = "I'm here with you. Could you tell me more about how you're feeling?";
+    
+    // Call Groq API if key is available
+    if (GROQ_API_KEY) {
+      try {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { 
+                role: 'system', 
+                content: `You are Dr. Kamau Njoroge, a compassionate and professional university counsellor at Karatina University in Kenya.
+                
+Guidelines:
 - Be warm, empathetic, and professional
 - Keep responses to 2-4 sentences
 - Ask thoughtful follow-up questions
-- If a student mentions crisis (self-harm, suicide), immediately provide the Befrienders Kenya crisis line: 0800 723 253 (free, 24/7)
-- Use Kenyan cultural context where appropriate
-- Never diagnose, but provide psychoeducation and coping strategies
-- Maintain confidentiality and trust
-
-You are available 24/7 to support students.`
-      }
-    ];
-    
-    // Add conversation history for context
-    if (history && history.length > 0) {
-      for (const msg of history.slice(-8)) { // Last 8 messages for context
-        messages.push({
-          role: msg.from === 'user' ? 'user' : 'assistant',
-          content: msg.text
+- Use Kenyan cultural context (HELB loans, family expectations, CATs, semester pressure)
+- If student mentions crisis (self-harm, suicide), immediately provide Befrienders Kenya: 0800 723 253 (free, 24/7)
+- Never diagnose - provide support and coping strategies
+- Maintain confidentiality and trust`
+              },
+              ...(history || []).slice(-10),
+              { role: 'user', content: message }
+            ],
+            max_tokens: 500,
+            temperature: 0.7
+          })
         });
+        
+        const data = await groqResponse.json();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          aiResponse = data.choices[0].message.content;
+        } else if (data.error) {
+          console.error('Groq API error:', data.error);
+        }
+      } catch (apiError) {
+        console.error('Groq API error:', apiError);
+        // Smart fallback responses
+        const msg = message.toLowerCase();
+        if (msg.includes('exam') || msg.includes('test') || msg.includes('study')) {
+          aiResponse = "Exam stress is very common at Karu. Breaking your study into 25-minute Pomodoro sessions can help. Which subject feels most overwhelming right now?";
+        } else if (msg.includes('sleep') || msg.includes('tired')) {
+          aiResponse = "Sleep difficulties affect many students. Try keeping your phone away 30 minutes before bed. How many hours are you currently getting?";
+        } else if (msg.includes('anxi') || msg.includes('worry') || msg.includes('nervous')) {
+          aiResponse = "Anxiety can feel overwhelming. Here's a grounding technique: name 5 things you can see, 4 you can touch, 3 you can hear. Want to try it with me?";
+        } else if (msg.includes('sad') || msg.includes('depress') || msg.includes('hopeless')) {
+          aiResponse = "Thank you for trusting me with this. You don't have to carry this alone. How long have you been feeling this way?";
+        } else if (msg.includes('lonely') || msg.includes('alone')) {
+          aiResponse = "Loneliness at university is more common than people admit. Would you like to explore some ways to connect with others on campus?";
+        } else if (msg.includes('hello') || msg.includes('hi')) {
+          aiResponse = "Hello! How are you feeling today? I'm here to listen and support you.";
+        }
+      }
+    } else {
+      // No Groq API key - use rule-based responses
+      const msg = message.toLowerCase();
+      if (msg.includes('exam') || msg.includes('study')) {
+        aiResponse = "Exam stress is common. Breaking study into 25-minute sessions can help. Which subject feels most overwhelming?";
+      } else if (msg.includes('sleep')) {
+        aiResponse = "Sleep difficulties affect many students. Try keeping your phone away 30 minutes before bed.";
+      } else if (msg.includes('anxi')) {
+        aiResponse = "Anxiety can feel overwhelming. Try naming 5 things you can see, 4 you can touch, 3 you can hear.";
+      } else if (msg.includes('sad')) {
+        aiResponse = "Thank you for trusting me. You don't have to carry this alone. How long have you been feeling this way?";
+      } else if (msg.includes('hello') || msg.includes('hi')) {
+        aiResponse = "Hello! How are you feeling today?";
+      } else {
+        aiResponse = "Thank you for sharing. Could you tell me more about that?";
       }
     }
     
-    // Add the current message
-    messages.push({ role: 'user', content: message });
-
-    // Call Groq API (FREE tier - 100k tokens/day)
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // Free, powerful model
-        messages: messages,
-        max_tokens: 500,
-        temperature: 0.7
-      })
-    });
-
-    const data = await response.json();
+    // Save AI response to Neon DB
+    await sql`
+      INSERT INTO chat_messages (user_id, message, sender)
+      VALUES (${userId}, ${aiResponse}, 'ai')
+    `;
     
-    if (data.error) {
-      console.error('Groq API Error:', data.error);
-      throw new Error(data.error.message);
-    }
-    
-    const aiResponse = data.choices?.[0]?.message?.content || 
-                       "I'm here with you. Could you tell me more about how you're feeling?";
-
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -88,12 +118,10 @@ You are available 24/7 to support students.`
     };
     
   } catch (error) {
-    console.error('Function Error:', error);
+    console.error('Chat function error:', error);
     return {
-      statusCode: 200, // Return 200 with fallback to avoid breaking the chat
-      body: JSON.stringify({ 
-        response: "I'm here to support you. Could you please rephrase or tell me more about what you're experiencing?" 
-      })
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to process message', details: error.message })
     };
   }
 };

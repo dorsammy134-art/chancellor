@@ -3,449 +3,473 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MindSpace Karu — AI Mental Health Support System</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<title>MindSpace Karu — AI Counsellor with Groq + Neon</title>
 <style>
-  :root {
-    --navy: #0f2744;
-    --navy2: #1a3a5c;
-    --teal: #0d9488;
-    --teal2: #14b8a6;
-    --green: #22c55e;
-    --mint: #a7f3d0;
-    --sky: #e0f2fe;
-    --blue: #2563eb;
-    --white: #ffffff;
-    --off: #f8fafc;
-    --gray: #e2e8f0;
-    --mid: #94a3b8;
-    --dark: #1e293b;
-    --red: #dc2626;
-    --amber: #f59e0b;
-    --redlight: #fef2f2;
-    --amberlight: #fffbeb;
-    --greenlight: #f0fdf4;
-    --sidebar-w: 240px;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f2744 0%, #1a3a5c 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--off); color: var(--dark); min-height: 100vh; overflow-x: hidden; }
-  
-  .sidebar {
-    position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
-    background: linear-gradient(170deg, #0f2744 0%, #0a1e35 60%, #071528 100%);
-    display: flex; flex-direction: column; z-index: 100;
-    border-right: 1px solid rgba(255,255,255,0.06);
+  .chat-container {
+    max-width: 800px;
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
   }
-  .sidebar-logo { padding: 28px 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .logo-mark { font-family: 'DM Serif Display', serif; font-size: 26px; color: #a7f3d0; letter-spacing: -0.5px; }
-  .logo-sub { font-size: 11px; color: rgba(167,243,208,0.5); margin-top: 2px; letter-spacing: 0.5px; }
-  .role-switcher { padding: 14px 16px 8px; }
-  .role-label { font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px; }
-  .role-btns { display: flex; gap: 5px; flex-wrap: wrap; }
-  .role-btn {
-    font-size: 10px; padding: 4px 10px; border-radius: 6px; border: none; cursor: pointer;
-    font-weight: 700; transition: all 0.2s; font-family: inherit;
-    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
+  .chat-header {
+    background: linear-gradient(135deg, #0f2744, #1d4ed8);
+    padding: 20px 24px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
   }
-  .role-btn.active { background: #a7f3d0; color: #0f2744; }
-  .nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
-  .nav-item {
-    display: flex; align-items: center; gap: 11px; width: 100%;
-    padding: 11px 14px; border-radius: 10px; border: none; cursor: pointer;
-    background: transparent; color: rgba(255,255,255,0.55); font-size: 14px; font-weight: 500;
-    font-family: inherit; text-align: left; margin-bottom: 2px;
-    border-left: 3px solid transparent; transition: all 0.18s;
+  .avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #a7f3d0, #22c55e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
   }
-  .nav-item:hover { background: rgba(167,243,208,0.08); color: rgba(255,255,255,0.8); }
-  .nav-item.active {
-    background: rgba(167,243,208,0.13); color: #a7f3d0; font-weight: 700;
-    border-left-color: #a7f3d0;
+  .header-info { flex: 1; }
+  .header-info h1 { font-size: 18px; margin-bottom: 4px; }
+  .header-info p { font-size: 12px; opacity: 0.8; }
+  .badge-group { display: flex; gap: 8px; }
+  .badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
   }
-  .nav-icon { font-size: 17px; flex-shrink: 0; }
-  .sidebar-user {
-    padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08);
-    display: flex; align-items: center; gap: 10;
+  .badge-groq { background: #f59e0b; color: white; }
+  .badge-neon { background: #22c55e; color: white; }
+  .chat-messages {
+    height: 400px;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
-  .user-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
+  .message {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+  }
+  .message.user { align-self: flex-end; }
+  .message.bot { align-self: flex-start; }
+  .message-content {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .user .message-content {
+    background: linear-gradient(135deg, #0f2744, #1d4ed8);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .bot .message-content {
+    background: white;
+    color: #1e293b;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  .time {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 4px;
+    margin-inline: 8px;
+  }
+  .chat-input-area {
+    padding: 16px 20px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 12px;
+  }
+  .chat-input-area input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 30px;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+  }
+  .chat-input-area input:focus { border-color: #0d9488; }
+  .chat-input-area button {
     background: linear-gradient(135deg, #0d9488, #22c55e);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; flex-shrink: 0;
+    color: white;
+    border: none;
+    padding: 0 28px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
   }
-  .user-name { font-size: 13px; color: #a7f3d0; font-weight: 700; }
-  .user-role { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
-
-  .main { margin-left: var(--sidebar-w); padding: 36px 40px; min-height: 100vh; }
-  .page { display: none; animation: fadeIn 0.25s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  .sh { margin-bottom: 28px; }
-  .sh h1 { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--navy); font-weight: 400; letter-spacing: -0.5px; }
-  .sh p { font-size: 14px; color: var(--mid); margin-top: 5px; }
-
-  .card { background: var(--white); border-radius: 16px; border: 1px solid var(--gray); box-shadow: 0 2px 12px rgba(15,39,68,0.07); overflow: hidden; }
-  .card-p { padding: 24px; }
-  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
-  .mb20 { margin-bottom: 20px; }
-
-  .stat { padding: 22px; position: relative; overflow: hidden; }
-  .stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-  .stat.navy::before { background: var(--navy); }
-  .stat.teal::before { background: var(--teal); }
-  .stat.green::before { background: var(--green); }
-  .stat.red::before { background: var(--red); }
-  .stat.amber::before { background: var(--amber); }
-  .stat-icon { font-size: 22px; margin-bottom: 10px; }
-  .stat-val { font-size: 34px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-size: 12px; color: var(--mid); font-weight: 600; }
-  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.3px; }
-
-  .btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
-    font-size: 14px; padding: 11px 22px; transition: all 0.18s;
-    font-family: inherit; text-decoration: none;
+  .chat-input-area button:hover { transform: scale(1.02); }
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 10px 16px;
+    background: white;
+    border-radius: 18px;
+    width: fit-content;
   }
-  .btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 8px; }
-  .btn-primary { background: linear-gradient(135deg, var(--navy), var(--navy2)); color: white; }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(15,39,68,0.25); }
-  .btn-green { background: linear-gradient(135deg, var(--teal), var(--green)); color: white; }
-  .btn-green:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,148,136,0.3); }
-  .btn-ghost { background: transparent; color: var(--navy); border: 2px solid var(--navy); }
-  .btn-ghost:hover { background: var(--navy); color: white; }
-  .btn-w { width: 100%; justify-content: center; }
-
-  .banner {
-    border-radius: 14px; padding: 18px 22px;
-    display: flex; align-items: center; gap: 16px;
+  .typing span {
+    width: 8px;
+    height: 8px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
   }
-  .banner-icon { font-size: 26px; flex-shrink: 0; }
-  .banner-title { font-weight: 800; font-size: 15px; }
-  .banner-sub { font-size: 13px; margin-top: 3px; line-height: 1.5; }
-  .banner-green { background: var(--greenlight); border: 2px solid var(--green); }
-  .banner-green .banner-title { color: var(--teal); }
-  .banner-red { background: var(--redlight); border: 2px solid var(--red); }
-  .banner-amber { background: var(--amberlight); border: 2px solid var(--amber); }
-
-  .chat-wrap { height: 360px; overflow-y: auto; padding: 20px; background: var(--off); display: flex; flex-direction: column; gap: 14px; }
-  .msg { display: flex; flex-direction: column; max-width: 65%; }
-  .msg.me { align-self: flex-end; align-items: flex-end; }
-  .msg.them { align-self: flex-start; align-items: flex-start; }
-  .msg-bubble {
-    padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.55;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-8px); opacity: 1; }
   }
-  .msg.me .msg-bubble { background: linear-gradient(135deg, #0f2744, #1d4ed8); color: white; border-bottom-right-radius: 4px; }
-  .msg.them .msg-bubble { background: white; color: var(--dark); border-bottom-left-radius: 4px; }
-  .msg-time { font-size: 11px; color: var(--mid); margin-top: 4px; }
-  .chat-input-area { padding: 16px 20px; background: white; border-top: 1px solid var(--gray); display: flex; gap: 10px; align-items: flex-end; }
-  .chat-input-area input { flex: 1; }
-
-  .typing-bubble { display:flex; align-items:center; gap:5px; padding:12px 16px; background:white; border-radius:16px; border-bottom-left-radius:4px; width:fit-content; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
-  .typing-dot { width:8px; height:8px; border-radius:50%; background:var(--mid); animation: typing 1.2s infinite; }
-  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes typing { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
-
-  .ai-badge { font-size:10px; font-weight:800; letter-spacing:0.5px; padding:2px 7px; border-radius:4px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
-  .live-clock {
-    font-size: 11px; color: rgba(167,243,208,0.7); font-weight: 700;
-    letter-spacing: 0.5px; padding: 4px 10px; background: rgba(167,243,208,0.08);
-    border-radius: 6px; border: 1px solid rgba(167,243,208,0.15);
-    display: flex; align-items: center; gap: 5px;
+  .login-screen, .register-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0a1e35, #0f2744);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
   }
-  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse-dot 1.5s infinite; }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-
-  .login-screen {
-    position: fixed; inset: 0; z-index: 9000;
-    background: linear-gradient(135deg, #0a1e35 0%, #0f2744 40%, #0d3b5e 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'DM Sans', sans-serif; overflow-y: auto; padding: 24px;
+  .hidden { display: none; }
+  .login-box, .register-box {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
   }
-  .login-screen.hidden { display: none; }
-  .login-box {
-    background: white; border-radius: 24px; padding: 40px 44px;
-    width: 100%; max-width: 460px; box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-    position: relative; overflow: hidden;
+  .login-box h2, .register-box h2 { color: #0f2744; margin-bottom: 8px; }
+  .login-box p, .register-box p { color: #64748b; margin-bottom: 24px; font-size: 14px; }
+  .login-box input, .register-box input, .register-box select {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 10px 0;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
   }
-  .login-box::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
-    background: linear-gradient(90deg, #0d9488, #22c55e, #2563eb);
+  .login-box input:focus, .register-box input:focus, .register-box select:focus {
+    outline: none;
+    border-color: #0d9488;
   }
-  .login-logo { text-align: center; margin-bottom: 26px; }
-  .login-logo .logo-main { font-family: 'DM Serif Display', serif; font-size: 30px; color: #0f2744; }
-  .login-field { margin-bottom: 14px; }
-  .login-field label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
-  .login-field input { width: 100%; padding: 12px 15px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; }
-  .login-btn {
-    width: 100%; padding: 13px; border: none; border-radius: 12px; cursor: pointer;
-    font-family: inherit; font-size: 14px; font-weight: 800;
-    background: linear-gradient(135deg, #0f2744, #1d4ed8); color: white;
-    transition: all 0.2s; margin-top: 6px;
+  .login-box button, .register-box button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #0d9488, #22c55e);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    font-size: 14px;
   }
-  .login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(15,39,68,0.3); }
-  .login-error { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 11px 15px; font-size: 13px; color: #dc2626; margin-bottom: 14px; display: none; }
-  .switch-link { text-align: center; margin-top: 16px; font-size: 13px; }
-  .switch-link a { color: #0d9488; font-weight: 700; cursor: pointer; }
-
-  .notif {
-    position: fixed; top: 20px; right: 20px; background: var(--navy);
-    color: white; padding: 14px 22px; border-radius: 12px; font-size: 14px;
-    font-weight: 600; z-index: 9999; transform: translateX(120%);
-    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    display: flex; align-items: center; gap: 10px;
+  .switch-link {
+    font-size: 13px;
+    color: #0d9488;
+    margin-top: 20px;
+    cursor: pointer;
+    text-decoration: underline;
   }
-  .notif.show { transform: translateX(0); }
-  .notif.success { border-left: 4px solid var(--green); }
+  .error-msg {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 8px;
+    display: none;
+    background: #fef2f2;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .user-info {
+    font-size: 11px;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+  @media (max-width: 600px) {
+    .message { max-width: 85%; }
+    .login-box, .register-box { padding: 24px; margin: 16px; }
+  }
 </style>
 </head>
 <body>
 
-<div id="notif" class="notif"></div>
-
-<!-- LOGIN SCREEN -->
+<!-- Login Screen -->
 <div id="loginScreen" class="login-screen">
-  <div class="login-box" id="loginPanel">
-    <div class="login-logo">
-      <div class="logo-main">🧠 MindSpace Karu</div>
-      <div class="logo-sub">AI-Powered Mental Health Support</div>
-    </div>
-    <div id="loginError" class="login-error"></div>
-    <div class="login-field">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="doreen.sammy@karu.ac.ke">
-    </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="student123">
-    </div>
-    <button class="login-btn" onclick="doLogin()">Sign In →</button>
-    <div class="switch-link">
-      <a onclick="showDemoHint()">Demo: doreen.sammy@karu.ac.ke / student123</a>
-    </div>
+  <div class="login-box">
+    <h2>🧠 MindSpace Karu</h2>
+    <p>AI-Powered Mental Health Support<br>with Groq AI + Neon Database</p>
+    <div id="loginError" class="error-msg"></div>
+    <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    <button onclick="doLogin()">Sign In →</button>
+    <div class="switch-link" onclick="showRegister()">📝 New student? Create an account</div>
+    <div style="margin-top: 16px; font-size: 11px; color: #94a3b8;">Demo: student@karu.ac.ke / password123</div>
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">MindSpace Karu</div>
-    <div class="logo-sub">AI Counsellor</div>
-  </div>
-  <div style="padding:8px 20px 4px">
-    <div class="live-clock"><span class="live-dot"></span><span id="liveClock">--:--:--</span></div>
-  </div>
-  <div class="role-switcher">
-    <div class="role-label">DEMO — SWITCH ROLE</div>
-    <div class="role-btns">
-      <button class="role-btn active" onclick="switchRole('student')">Student</button>
-      <button class="role-btn" onclick="switchRole('counsellor')">Counsellor</button>
-      <button class="role-btn" onclick="switchRole('admin')">Admin</button>
-    </div>
-  </div>
-  <nav class="nav" id="nav"></nav>
-  <div class="sidebar-user">
-    <div class="user-avatar" id="userAvatar">👩</div>
-    <div style="margin-left:10px">
-      <div class="user-name" id="userName">Doreen Sammy</div>
-      <div class="user-role" id="userRoleLabel">Student · Year 3 CS</div>
-    </div>
+<!-- Register Screen -->
+<div id="registerScreen" class="register-screen hidden">
+  <div class="register-box">
+    <h2>📝 Create Account</h2>
+    <p>Join MindSpace Karu for free</p>
+    <div id="registerError" class="error-msg"></div>
+    <input type="text" id="regName" placeholder="Full Name" autocomplete="name">
+    <input type="email" id="regEmail" placeholder="Email (@karu.ac.ke or @students.karu.ac.ke)" autocomplete="email">
+    <input type="text" id="regYear" placeholder="Year of Study (e.g., Year 3)">
+    <input type="text" id="regProgramme" placeholder="Programme (e.g., Computer Science)">
+    <input type="password" id="regPassword" placeholder="Password (min 8 characters)" autocomplete="new-password">
+    <button onclick="doRegister()">Create Account →</button>
+    <div class="switch-link" onclick="showLogin()">← Back to Sign In</div>
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
-<div class="main">
-  <div class="page active" id="page-dashboard">
-    <div class="sh"><h1>Welcome back, Doreen 👋</h1><p>Your mental wellness overview — <span id="todayDate"></span></p></div>
-    <div class="g4 mb20">
-      <div class="card stat navy"><div class="stat-icon">📊</div><div class="stat-val">8</div><div class="stat-label">Last PHQ-9 Score</div></div>
-      <div class="card stat teal"><div class="stat-icon">💭</div><div class="stat-val">5</div><div class="stat-label">Last GAD-7 Score</div></div>
-      <div class="card stat green"><div class="stat-icon">😊</div><div class="stat-val">4.4</div><div class="stat-label">Avg Mood This Week</div></div>
-      <div class="card stat amber"><div class="stat-icon">✅</div><div class="stat-val">3</div><div class="stat-label">Assessments Taken</div></div>
+<!-- Chat App -->
+<div class="chat-container" id="chatApp" style="display: none;">
+  <div class="chat-header">
+    <div class="avatar">👨‍⚕️</div>
+    <div class="header-info">
+      <h1>Dr. Kamau Njoroge <span class="user-info" id="userNameDisplay"></span></h1>
+      <p>AI Counsellor · Available 24/7</p>
     </div>
-    <div class="g2 mb20">
-      <div class="card card-p">
-        <div style="font-weight:800;margin-bottom:16px">📈 Quick Actions</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <button class="btn btn-green btn-w" onclick="goTo('chat')">💬 Chat with AI Counsellor</button>
-          <button class="btn btn-primary btn-w" onclick="goTo('assessment')">📋 Take Assessment</button>
-          <button class="btn btn-ghost btn-w" onclick="goTo('resources')">📚 Resource Library</button>
-        </div>
-      </div>
-      <div class="card card-p">
-        <div style="font-weight:800;margin-bottom:16px">🤖 AI Counsellor - Dr. Kamau</div>
-        <div style="font-size:14px;color:var(--mid);margin-bottom:16px">Available 24/7 for confidential support. Powered by advanced AI for natural conversations.</div>
-        <button class="btn btn-green btn-w" onclick="goTo('chat')">Start Conversation →</button>
-      </div>
-    </div>
-    <div class="banner banner-green">
-      <div class="banner-icon">💚</div>
-      <div><div class="banner-title">24/7 AI Support Available</div><div class="banner-sub">Crisis? Call Befrienders Kenya: 0800 723 253</div></div>
+    <div class="badge-group">
+      <span class="badge badge-groq">🤖 Groq AI</span>
+      <span class="badge badge-neon">🗄️ Neon DB</span>
     </div>
   </div>
-
-  <!-- CHAT PAGE -->
-  <div class="page" id="page-chat">
-    <div class="sh"><h1>Chat with AI Counsellor</h1><p>Confidential, encrypted conversations with Dr. Kamau (AI-Powered)</p></div>
-    <div class="card" style="max-width:740px">
-      <div style="background:linear-gradient(135deg,#0f2744,#1d4ed8);padding:18px 24px;display:flex;align-items:center;gap:14px">
-        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#a7f3d0,#6ee7b7);display:flex;align-items:center;justify-content:center;font-size:20px">👨‍⚕️</div>
-        <div>
-          <div style="font-weight:800;color:white;font-size:15px">Dr. Kamau Njoroge (AI)</div>
-          <div style="font-size:12px;color:rgba(167,243,208,0.8)">🟢 Online · AI Counsellor</div>
-        </div>
-        <div style="margin-left:auto"><span class="ai-badge">🤖 AI-Powered</span></div>
-      </div>
-      <div class="chat-wrap" id="chatMessages">
-        <div class="msg them"><div class="msg-bubble">Hello! I'm Dr. Kamau, your AI counsellor. How are you feeling today? I'm here to listen and support you.</div><div class="msg-time">Just now</div></div>
-      </div>
-      <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Type your message... (Enter to send)" onkeydown="if(event.key==='Enter')sendChat()">
-        <button class="btn btn-green" onclick="sendChat()">Send 🔒</button>
-      </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="message bot">
+      <div class="message-content">Hello! I'm Dr. Kamau, your AI counsellor. I'm powered by Groq's LLaMA 3.3 70B model, and our conversation is securely stored in Neon PostgreSQL. How are you feeling today?</div>
+      <div class="time">Just now</div>
     </div>
   </div>
-
-  <!-- Other pages (simplified for brevity) -->
-  <div class="page" id="page-assessment"><div class="sh"><h1>Assessment</h1><p>PHQ-9 and GAD-7 screening tools coming soon.</p></div></div>
-  <div class="page" id="page-resources"><div class="sh"><h1>Resources</h1><p>Mental health resources and coping strategies.</p></div></div>
-  <div class="page" id="page-c-dashboard"><div class="sh"><h1>Counsellor Dashboard</h1><p>Student overview and analytics.</p></div></div>
-  <div class="page" id="page-a-dashboard"><div class="sh"><h1>Admin Dashboard</h1><p>System administration.</p></div></div>
+  <div class="chat-input-area">
+    <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+    <button onclick="sendMessage()">Send →</button>
+  </div>
 </div>
 
 <script>
-// ============================================
-// SIMPLE LOGIN SYSTEM
-// ============================================
-const DEMO_USERS = {
-  'doreen.sammy@karu.ac.ke': { pass: 'student123', name: 'Doreen Sammy', role: 'student', roleLabel: 'Student · Year 3 CS', avatar: '👩' }
-};
+let currentUser = null;
+let messages = [];
+let isTyping = false;
 
-let state = { role: 'student', messages: [], aiTyping: false };
-
-function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const pass = document.getElementById('loginPassword').value;
-  const user = DEMO_USERS[email];
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
   
-  if (!user || user.pass !== pass) {
-    document.getElementById('loginError').textContent = 'Invalid email or password';
-    document.getElementById('loginError').style.display = 'block';
+  errorEl.style.display = 'none';
+  
+  if (!email || !password) {
+    errorEl.textContent = 'Please enter email and password';
+    errorEl.style.display = 'block';
     return;
   }
   
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('userName').textContent = user.name;
-  document.getElementById('userRoleLabel').textContent = user.roleLabel;
-  document.getElementById('userAvatar').textContent = user.avatar;
-  state.role = user.role;
-  buildNav();
-  goTo('chat');
-}
-
-function showDemoHint() {
-  document.getElementById('loginEmail').value = 'doreen.sammy@karu.ac.ke';
-  document.getElementById('loginPassword').value = 'student123';
-}
-
-function buildNav() {
-  const nav = document.getElementById('nav');
-  const items = [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'chat', icon: '💬', label: 'AI Counsellor' },
-    { id: 'assessment', icon: '📋', label: 'Assessment' },
-    { id: 'resources', icon: '📚', label: 'Resources' }
-  ];
-  nav.innerHTML = items.map(item => `<button class="nav-item" onclick="goTo('${item.id}')"><span class="nav-icon">${item.icon}</span>${item.label}</button>`).join('');
-}
-
-function goTo(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-}
-
-function switchRole(r) { state.role = r; goTo('dashboard'); }
-
-function notify(msg) {
-  const el = document.getElementById('notif');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-// ============================================
-// AI CHAT FUNCTION - CALLS NETLIFY FUNCTION
-// ============================================
-function renderChat() {
-  const wrap = document.getElementById('chatMessages');
-  wrap.innerHTML = state.messages.map(m => `
-    <div class="msg ${m.from === 'user' ? 'me' : 'them'}">
-      <div class="msg-bubble">${m.text.replace(/</g, '&lt;')}</div>
-      <div class="msg-time">${m.time}</div>
-    </div>
-  `).join('');
-  
-  if(state.aiTyping) {
-    wrap.innerHTML += `<div class="msg them"><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div><div class="msg-time">Dr. Kamau is typing...</div></div>`;
+  try {
+    const response = await fetch('/.netlify/functions/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      currentUser = data.user;
+      document.getElementById('userNameDisplay').textContent = currentUser.name;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('chatApp').style.display = 'block';
+      await loadChatHistory();
+    } else {
+      errorEl.textContent = data.error || 'Login failed';
+      errorEl.style.display = 'block';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Network error. Please try again.';
+    errorEl.style.display = 'block';
   }
-  wrap.scrollTop = wrap.scrollHeight;
 }
 
-async function sendChat() {
-  const inp = document.getElementById('chatInput');
-  const text = inp.value.trim();
-  if(!text || state.aiTyping) return;
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const year = document.getElementById('regYear').value.trim();
+  const programme = document.getElementById('regProgramme').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const errorEl = document.getElementById('registerError');
   
-  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  state.messages.push({ from: 'user', text, time });
-  inp.value = '';
-  renderChat();
+  errorEl.style.display = 'none';
   
-  state.aiTyping = true;
-  renderChat();
+  if (!name || !email || !password) {
+    errorEl.textContent = 'Please fill all required fields';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  if (!email.endsWith('@karu.ac.ke') && !email.endsWith('@students.karu.ac.ke')) {
+    errorEl.textContent = 'Please use a valid Karatina University email (@karu.ac.ke or @students.karu.ac.ke)';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  if (password.length < 8) {
+    errorEl.textContent = 'Password must be at least 8 characters';
+    errorEl.style.display = 'block';
+    return;
+  }
   
   try {
-    // Call your Netlify function
+    const response = await fetch('/.netlify/functions/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        fullName: name, 
+        email, 
+        yearOfStudy: year || null, 
+        programme: programme || null, 
+        password 
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Account created successfully! Please sign in.');
+      showLogin();
+      document.getElementById('loginEmail').value = email;
+    } else {
+      errorEl.textContent = data.error || 'Registration failed';
+      errorEl.style.display = 'block';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Network error. Please try again.';
+    errorEl.style.display = 'block';
+  }
+}
+
+async function loadChatHistory() {
+  try {
+    const response = await fetch(`/.netlify/functions/get-history?userId=${currentUser.id}`);
+    const data = await response.json();
+    if (data.messages && data.messages.length > 0) {
+      messages = data.messages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        text: m.message,
+        time: new Date(m.created_at)
+      }));
+      renderMessages();
+    }
+  } catch (err) {
+    console.error('Failed to load history:', err);
+  }
+}
+
+function addMessage(role, text) {
+  messages.push({ role: role, text: text, time: new Date() });
+  renderMessages();
+}
+
+function renderMessages() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = messages.map(msg => `
+    <div class="message ${msg.role === 'user' ? 'user' : 'bot'}">
+      <div class="message-content">${escapeHtml(msg.text)}</div>
+      <div class="time">${formatTime(msg.time)}</div>
+    </div>
+  `).join('');
+  if (isTyping) {
+    container.innerHTML += `<div class="message bot"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  }
+  container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatTime(date) {
+  return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || isTyping || !currentUser) return;
+  
+  addMessage('user', text);
+  input.value = '';
+  
+  isTyping = true;
+  renderMessages();
+  
+  try {
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: text,
-        history: state.messages.filter(m => m.from === 'user' || m.from === 'assistant').slice(-10)
+        userId: currentUser.id,
+        history: messages.slice(-10).filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({ 
+          role: m.role === 'user' ? 'user' : 'assistant', 
+          content: m.text 
+        }))
       })
     });
     
     const data = await response.json();
-    const aiResponse = data.response || "I'm here for you. Could you tell me more?";
     
-    state.aiTyping = false;
-    state.messages.push({ from: 'assistant', text: aiResponse, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-    renderChat();
-  } catch(error) {
-    console.error('Chat error:', error);
-    state.aiTyping = false;
-    // Fallback responses if AI fails
-    const fallbacks = [
-      "I'm here with you. Could you tell me more about how you're feeling?",
-      "Thank you for sharing. What else is on your mind today?",
-      "I hear you. Would you like to explore some coping strategies together?"
-    ];
-    state.messages.push({ from: 'assistant', text: fallbacks[Math.floor(Math.random() * fallbacks.length)], time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-    renderChat();
+    if (data.response) {
+      addMessage('assistant', data.response);
+    } else {
+      addMessage('assistant', "I'm here with you. Could you tell me more?");
+    }
+  } catch (err) {
+    console.error('Chat error:', err);
+    addMessage('assistant', "I'm having trouble connecting. Please try again.");
   }
+  
+  isTyping = false;
+  renderMessages();
 }
 
-function updateClock() {
-  const now = new Date();
-  document.getElementById('liveClock').textContent = now.toLocaleTimeString();
+function showRegister() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('registerScreen').classList.remove('hidden');
 }
-updateClock();
-setInterval(updateClock, 1000);
-document.getElementById('todayDate').textContent = new Date().toLocaleDateString();
+
+function showLogin() {
+  document.getElementById('registerScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+// Initial render
+renderMessages();
 </script>
 </body>
 </html>
